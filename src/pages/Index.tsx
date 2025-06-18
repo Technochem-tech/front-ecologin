@@ -4,17 +4,34 @@ import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Fingerprint, LogIn } from 'lucide-react';
 import Layout from '@/components/Layout';
 
-const Index: React.FC = () => {
+import {login} from '@/services/login';
+import { AxiosError } from 'axios';
+
+
+const   Index: React.FC = () => {
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [senha, setSenha] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+  const [erroMensagem, setErroMensagem] = useState<string | null>(null);
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    // In a real app, you would validate and authenticate here
+  const handleLogin = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setErroMensagem(null);
+  try {
+    const resposta = await login({ email, senha });
+    localStorage.setItem('token', resposta.token);
     navigate('/dashboard');
-  };
+  } catch (erro: unknown) {
+  const err = erro as AxiosError<{ mensagem: string }>;
+  if (err.response?.data?.mensagem) {
+    setErroMensagem(err.response.data.mensagem);
+  } else {
+    setErroMensagem('Erro inesperado ao fazer login.');
+  }
+}
+};
+
 
   return (
     <Layout>
@@ -83,8 +100,8 @@ const Index: React.FC = () => {
                     name="password"
                     type={showPassword ? "text" : "password"}
                     required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    value={senha}
+                    onChange={(e) => setSenha(e.target.value)}
                     className="eco-input pr-10"
                     placeholder="••••••••"
                   />
@@ -131,6 +148,12 @@ const Index: React.FC = () => {
                 </button>
               </div>
             </form>
+
+            {erroMensagem && (
+             <div className="mt-2 text-xs text-center text-gray-600">
+                {erroMensagem}
+              </div>
+            )}  
             
             <div className="mt-6 flex items-center justify-between">
               <div className="text-sm">
