@@ -1,6 +1,6 @@
 import api from "./api";
+import { tratarErroAPI } from "@/utils/tratarErroAPI"; // ajuste o caminho conforme seu projeto
 
-// Tipo da resposta que vem da API
 export type UsuarioResposta = {
   id: number;
   nome: string;
@@ -10,13 +10,49 @@ export type UsuarioResposta = {
   telefone: string;
 };
 
-// Função que recebe o token e retorna os dados do usuário
+// Buscar usuário logado
 export async function usuario(token: string): Promise<UsuarioResposta> {
-  const resposta = await api.get("api/Usuario/ConsultarUsuario", {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  try {
+    const resposta = await api.get("/api/Usuario/ConsultarUsuario", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return resposta.data;
+  } catch (error) {
+    tratarErroAPI(error);
+    throw error;
+  }
+}
 
-  return resposta.data;
+// Atualizar telefone
+export async function atualizarTelefone(token: string, telefone: string): Promise<void> {
+  try {
+    await api.put(
+      "/api/Usuario/EditarTelefone",
+      { telefone },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+  } catch (error) {
+    tratarErroAPI(error);
+    throw error;
+  }
+}
+
+// Buscar imagem do usuário (retorna URL temporária)
+export async function buscarImagemUsuario(token: string): Promise<string> {
+  try {
+    const resposta = await api.get("/api/Usuario/Buscar-imagem", {
+      headers: { Authorization: `Bearer ${token}` },
+      responseType: "blob", // necessário para tratar imagem binária
+    });
+
+    const urlImagem = URL.createObjectURL(resposta.data);
+    return urlImagem;
+  } catch (error) {
+    tratarErroAPI(error);
+    throw error;
+  }
 }

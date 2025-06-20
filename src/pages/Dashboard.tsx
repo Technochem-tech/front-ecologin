@@ -130,21 +130,12 @@ const Dashboard: React.FC = () => {
         >
           <div className="flex justify-between items-center">
             <div>
-              <p className="text-sm text-gray-600">Olá,</p>
-              <h1 className="text-2xl font-bold text-gray-900">
-                {usuarioLogado ? usuarioLogado.nome : "Carregando..."}
-              </h1>
+              
               <p className="text-sm text-eco-green-700">
                 Seu impacto positivo continua!
               </p>
             </div>
-            <div className="h-12 w-12 rounded-full bg-gray-200 overflow-hidden border-2 border-white shadow-sm">
-              <img
-                src="https://randomuser.me/api/portraits/men/32.jpg"
-                alt="User profile"
-                className="h-full w-full object-cover"
-              />
-            </div>
+            
           </div>
         </header>
 
