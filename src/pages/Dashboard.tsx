@@ -8,10 +8,17 @@ import { useNavigate } from "react-router-dom";
 
 import React, { useEffect, useState } from "react";
 import { getSaldo, getSaldoCreditos } from "@/services/getSaldo";
+import { usuario, UsuarioResposta } from "@/services/Usuario";
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const [saldo, setSaldo] = useState<number | null>(null);
+  const [saldoCredito, setSaldoCredito] = useState<number | null>(null);
+  const [usuarioLogado, setUsuarioLogado] = useState<UsuarioResposta | null>(
+    null
+  );
+
+  // buscar saldo dinheiro
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -32,7 +39,7 @@ const Dashboard: React.FC = () => {
     buscarSaldo();
   }, [navigate]);
 
-  const [saldoCredito, setSaldoCredito] = useState<number | null>(null);
+  // buscar saldo Créditos
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -49,6 +56,19 @@ const Dashboard: React.FC = () => {
       }
     };
     buscarSaldoCredito();
+  }, [navigate]);
+
+  //buscar usuario logado
+  useEffect(() => {
+    async function carregarUsuario() {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      const dados = await usuario(token);
+      setUsuarioLogado(dados);
+    }
+
+    carregarUsuario();
   }, [navigate]);
 
   const handleActionClick = (action: string) => {
@@ -103,11 +123,17 @@ const Dashboard: React.FC = () => {
     <Layout showNavbar>
       <div className="min-h-screen pt-6 pb-20 page-transition">
         {/* Header */}
-        <header className="mb-8 opacity-0 animate-fade-in">
+        <header
+          className={`mb-8 transition-opacity duration-700 ${
+            usuarioLogado ? "opacity-100 animate-fade-in" : "opacity-0"
+          }`}
+        >
           <div className="flex justify-between items-center">
             <div>
               <p className="text-sm text-gray-600">Olá,</p>
-              <h1 className="text-2xl font-bold text-gray-900">João Silva</h1>
+              <h1 className="text-2xl font-bold text-gray-900">
+                {usuarioLogado ? usuarioLogado.nome : "Carregando..."}
+              </h1>
               <p className="text-sm text-eco-green-700">
                 Seu impacto positivo continua!
               </p>
@@ -122,7 +148,7 @@ const Dashboard: React.FC = () => {
           </div>
         </header>
 
-        {/* Balance Cards */}
+        {/* Balance Cards  exibindo na tela saldo dinheiro*/}
         <section className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
           <BalanceCard
             amount={
@@ -135,6 +161,7 @@ const Dashboard: React.FC = () => {
             }
           />
 
+          {/*exibindo na tela saldo créditos*/}
           <CarbonCreditsCard
             amount={
               typeof saldoCredito === "number"
