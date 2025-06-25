@@ -1,37 +1,34 @@
+import React, { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { Eye, EyeOff, Fingerprint, LogIn } from "lucide-react";
+import Layout from "@/components/Layout";
 
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, Fingerprint, LogIn } from 'lucide-react';
-import Layout from '@/components/Layout';
+import { login } from "@/services/login";
+import { AxiosError } from "axios";
 
-import {login} from '@/services/login';
-import { AxiosError } from 'axios';
-
-
-const   Index: React.FC = () => {
-  const [email, setEmail] = useState('');
-  const [senha, setSenha] = useState('');
+const Index: React.FC = () => {
+  const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const [erroMensagem, setErroMensagem] = useState<string | null>(null);
 
   const handleLogin = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setErroMensagem(null);
-  try {
-    const resposta = await login({ email, senha });
-    localStorage.setItem('token', resposta.token);
-    navigate('/dashboard');
-  } catch (erro: unknown) {
-  const err = erro as AxiosError<{ mensagem: string }>;
-  if (err.response?.data?.mensagem) {
-    setErroMensagem(err.response.data.mensagem);
-  } else {
-    setErroMensagem('Erro inesperado ao fazer login.');
-  }
-}
-};
-
+    e.preventDefault();
+    setErroMensagem(null);
+    try {
+      const resposta = await login({ email, senha });
+      localStorage.setItem("token", resposta.token);
+      navigate("/dashboard");
+    } catch (erro: unknown) {
+      const err = erro as AxiosError<{ mensagem: string }>;
+      if (err.response?.data?.mensagem) {
+        setErroMensagem(err.response.data.mensagem);
+      } else {
+        setErroMensagem("Erro inesperado ao fazer login.");
+      }
+    }
+  };
 
   return (
     <Layout>
@@ -39,23 +36,54 @@ const   Index: React.FC = () => {
         <div className="absolute inset-0 -z-10 overflow-hidden">
           <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?q=80&w=2913&auto=format&fit=crop')] bg-cover bg-center opacity-10"></div>
         </div>
-        
+
         <div className="w-full max-w-md space-y-8">
           <div className="text-center">
             <div className="relative mb-2 inline-block">
               <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-eco-green-400 to-eco-blue-400 opacity-75 blur-sm animate-pulse"></div>
               <div className="relative rounded-full bg-white p-4 shadow-sm">
-                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="mx-auto">
-                  <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="url(#paint0_linear)" strokeWidth="1.5"/>
-                  <path d="M8 12.4444L10.5 15L16 9" stroke="url(#paint1_linear)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                <svg
+                  width="40"
+                  height="40"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="mx-auto"
+                >
+                  <path
+                    d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"
+                    stroke="url(#paint0_linear)"
+                    strokeWidth="1.5"
+                  />
+                  <path
+                    d="M8 12.4444L10.5 15L16 9"
+                    stroke="url(#paint1_linear)"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
                   <defs>
-                    <linearGradient id="paint0_linear" x1="2" y1="12" x2="22" y2="12" gradientUnits="userSpaceOnUse">
-                      <stop stopColor="#3f9049"/>
-                      <stop offset="1" stopColor="#0ca5eb"/>
+                    <linearGradient
+                      id="paint0_linear"
+                      x1="2"
+                      y1="12"
+                      x2="22"
+                      y2="12"
+                      gradientUnits="userSpaceOnUse"
+                    >
+                      <stop stopColor="#3f9049" />
+                      <stop offset="1" stopColor="#0ca5eb" />
                     </linearGradient>
-                    <linearGradient id="paint1_linear" x1="8" y1="12" x2="16" y2="12" gradientUnits="userSpaceOnUse">
-                      <stop stopColor="#3f9049"/>
-                      <stop offset="1" stopColor="#0ca5eb"/>
+                    <linearGradient
+                      id="paint1_linear"
+                      x1="8"
+                      y1="12"
+                      x2="16"
+                      y2="12"
+                      gradientUnits="userSpaceOnUse"
+                    >
+                      <stop stopColor="#3f9049" />
+                      <stop offset="1" stopColor="#0ca5eb" />
                     </linearGradient>
                   </defs>
                 </svg>
@@ -69,11 +97,14 @@ const   Index: React.FC = () => {
               Transforme suas finanças. Salve o planeta.
             </p>
           </div>
-          
+
           <div className="glass-card rounded-2xl shadow-lg px-6 py-8 mt-8">
             <form className="space-y-6" onSubmit={handleLogin}>
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   E-mail ou CPF/CNPJ
                 </label>
                 <div className="mt-1">
@@ -91,7 +122,10 @@ const   Index: React.FC = () => {
               </div>
 
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   Senha
                 </label>
                 <div className="mt-1 relative">
@@ -128,16 +162,18 @@ const   Index: React.FC = () => {
                   Entrar
                 </button>
               </div>
-              
+
               <div className="relative py-2">
                 <div className="absolute inset-0 flex items-center">
                   <div className="w-full border-t border-gray-200"></div>
                 </div>
                 <div className="relative flex justify-center">
-                  <span className="bg-white px-4 text-sm text-gray-500">ou</span>
+                  <span className="bg-white px-4 text-sm text-gray-500">
+                    ou
+                  </span>
                 </div>
               </div>
-              
+
               <div>
                 <button
                   type="button"
@@ -150,21 +186,27 @@ const   Index: React.FC = () => {
             </form>
 
             {erroMensagem && (
-             <div className="mt-2 text-xs text-center text-gray-600">
+              <div className="mt-2 text-xs text-center text-gray-600">
                 {erroMensagem}
               </div>
-            )}  
-            
+            )}
+
             <div className="mt-6 flex items-center justify-between">
               <div className="text-sm">
-                <a href="#" className="font-medium text-eco-green-600 hover:text-eco-green-500">
+                <a
+                  href="#"
+                  className="font-medium text-eco-green-600 hover:text-eco-green-500"
+                >
                   Esqueci minha senha
                 </a>
               </div>
               <div className="text-sm">
-                <a href="#" className="font-medium text-eco-green-600 hover:text-eco-green-500">
+                <Link
+                  to="/Cadastro"
+                  className="font-medium text-eco-green-600 hover:text-eco-green-500"
+                >
                   Criar Conta
-                </a>
+                </Link>
               </div>
             </div>
           </div>

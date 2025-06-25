@@ -75,3 +75,22 @@ export async function AddOuAtualizarImgUsuario(token: string, imagem: File): Pro
     throw error;
   }
 }
+// cadastrar usuario
+export type UsuarioCadastro = {
+  nome: string;
+  email: string;
+  senha: string;
+  empresa: string;
+  cnpj: string;
+  telefone: string;
+};
+
+export async function cadastrarUsuario(dados: UsuarioCadastro): Promise<void> {
+  try {
+    await api.post("/api/Usuario/Cadastrar", dados);
+  } catch (error) {
+    tratarErroAPI(error);
+    throw error;
+  }
+}
+
