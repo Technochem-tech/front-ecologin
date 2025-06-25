@@ -2,8 +2,10 @@ import React, { useState, useEffect } from "react";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PlusCircle, Edit, CreditCard, Trash2 } from "lucide-react";
+import { PlusCircle, Edit, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import CardForm from "@/components/CardForm";
 import {
@@ -11,82 +13,26 @@ import {
   usuario,
   atualizarTelefone,
   buscarImagemUsuario,
+  AddOuAtualizarImgUsuario,
 } from "@/services/Usuario";
 
 const Profile: React.FC = () => {
+  const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [isCardDialogOpen, setIsCardDialogOpen] = useState(false);
-  const [usuarioLogado, setUsuarioLogado] = useState<UsuarioResposta | null>(null);
+  const [usuarioLogado, setUsuarioLogado] = useState<UsuarioResposta | null>(
+    null
+  );
   const [fotoPerfil, setFotoPerfil] = useState<string | null>(null);
-
-  useEffect(() => {
-    async function carregarUsuario() {
-      const token = localStorage.getItem("token");
-      if (!token) return;
-
-      const dados = await usuario(token);
-      setUsuarioLogado(dados);
-
-      try {
-        const imagemBase64 = await buscarImagemUsuario(token);
-        setFotoPerfil(imagemBase64);
-      } catch (error) {
-        console.warn("Não foi possível carregar a imagem do usuário.");
-      }
-    }
-
-    carregarUsuario();
-  }, []);
+  const [imagemSelecionada, setImagemSelecionada] = useState<File | null>(null);
 
   const [userData, setUserData] = useState({
     name: "carregando...",
     email: "carregando...",
     phone: "carregando...",
     registrationCode: "carregando...",
+    dataRegistro: "", // importante ser string vazia e não "carregando..."
   });
-
-  useEffect(() => {
-    if (usuarioLogado) {
-      const codigoFormatado = `ECO-010${String(usuarioLogado.id).padStart(6, "0")}`;
-      setUserData({
-        name: usuarioLogado.nome,
-        email: usuarioLogado.email,
-        phone: formatarTelefone(usuarioLogado.telefone),
-        registrationCode: codigoFormatado,
-      });
-    }
-  }, [usuarioLogado]);
-
-  const formatarTelefone = (telefone: string): string => {
-    const raw = telefone.replace(/\D/g, "");
-    return raw
-      .replace(/^(\d{2})(\d)/, "($1) $2")
-      .replace(/(\d{5})(\d)/, "$1-$2")
-      .slice(0, 15);
-  };
-
-  const handleSaveChanges = async () => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      toast.error("Usuário não autenticado.");
-      return;
-    }
-
-    const rawPhone = userData.phone.replace(/\D/g, "");
-    if (rawPhone.length !== 11) {
-      toast.error("Número de telefone inválido.");
-      return;
-    }
-
-    try {
-      await atualizarTelefone(token, rawPhone);
-      setIsEditing(false);
-      toast.success("Telefone atualizado com sucesso!");
-    } catch (error) {
-      console.error(error);
-      toast.error("Erro ao atualizar telefone.");
-    }
-  };
 
   const [paymentMethods, setPaymentMethods] = useState([
     {
@@ -105,11 +51,103 @@ const Profile: React.FC = () => {
     },
   ]);
 
+  // Função para formatar "Membro desde mês/ano"
+  function formatarMesAno(data: string) {
+    const d = new Date(data);
+    if (isNaN(d.getTime())) return "—"; // Data inválida
+    return d.toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
+  }
+
+  // Formata telefone para exibir (XX) XXXXX-XXXX
+  const formatarTelefone = (telefone: string): string => {
+    const raw = telefone.replace(/\D/g, "");
+    return raw
+      .replace(/^(\d{2})(\d)/, "($1) $2")
+      .replace(/(\d{5})(\d)/, "$1-$2")
+      .slice(0, 15);
+  };
+
+  // Carregar dados do usuário e imagem no início
+  useEffect(() => {
+    async function carregarUsuario() {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      try {
+        // Chama API que consulta dados do usuário logado
+        const dados = await usuario(token);
+        setUsuarioLogado(dados);
+
+        // Chama API para buscar imagem do usuário (retorna blob e gera URL temporária)
+        const imagemBase64 = await buscarImagemUsuario(token);
+        setFotoPerfil(imagemBase64);
+      } catch (error) {
+        console.warn("Não foi possível carregar a imagem do usuário.");
+      }
+    }
+    carregarUsuario();
+  }, []);
+
+  // Atualiza os dados exibidos quando usuário carregado
+  useEffect(() => {
+    if (usuarioLogado) {
+      const codigoFormatado = `ECO-010${String(usuarioLogado.id).padStart(
+        6,
+        "0"
+      )}`;
+      setUserData({
+        name: usuarioLogado.nome,
+        email: usuarioLogado.email,
+        phone: formatarTelefone(usuarioLogado.telefone),
+        registrationCode: codigoFormatado,
+        dataRegistro: usuarioLogado.dataCadastro,
+      });
+    }
+  }, [usuarioLogado]);
+
+  // Salvar alterações: telefone e imagem
+  const handleSaveChanges = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("Usuário não autenticado.");
+      return;
+    }
+
+    const rawPhone = userData.phone.replace(/\D/g, "");
+    if (rawPhone.length !== 11) {
+      toast.error("Número de telefone inválido.");
+      return;
+    }
+
+    try {
+      // Chama API para atualizar telefone
+      await atualizarTelefone(token, rawPhone);
+
+      // Se imagem foi selecionada, chama API para salvar/atualizar imagem do usuário
+      if (imagemSelecionada) {
+        await AddOuAtualizarImgUsuario(token, imagemSelecionada);
+
+        // Atualiza preview da imagem após salvar
+        const novaImagem = await buscarImagemUsuario(token);
+        setFotoPerfil(novaImagem);
+      }
+
+      setIsEditing(false);
+      toast.success("Dados atualizados com sucesso!");
+    } catch (error) {
+      console.error(error);
+      toast.error("Erro ao salvar alterações.");
+    }
+  };
+  
+
+  // Excluir método de pagamento
   const handleDeletePaymentMethod = (id: string) => {
     setPaymentMethods(paymentMethods.filter((method) => method.id !== id));
     toast.success("Método de pagamento removido com sucesso!");
   };
 
+  // Adicionar novo cartão
   const handleAddCard = (cardData: any) => {
     const lastFourDigits = cardData.cardNumber.replace(/\s/g, "").slice(-4);
     const maskedNumber = `**** **** **** ${lastFourDigits}`;
@@ -131,24 +169,45 @@ const Profile: React.FC = () => {
     <Layout showNavbar>
       <div className="min-h-screen pt-6 pb-20">
         <header className="mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">Perfil</h1>
-          <p className="text-sm text-gray-600">Gerencie suas informações pessoais e financeiras</p>
+          <div className="flex items-center mb-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate("/dashboard")}
+              className="mr-2"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <h1 className="text-2xl font-bold text-gray-900">Perfil</h1>
+          </div>
+          <p className="text-sm text-gray-600">
+            Gerencie suas informações pessoais e financeiras
+          </p>
         </header>
 
         <Tabs defaultValue="personal" className="mb-8">
           <TabsList className="grid grid-cols-2 w-full bg-eco-green-50 p-1 rounded-lg">
-            <TabsTrigger value="personal" className="data-[state=active]:bg-white">
+            <TabsTrigger
+              value="personal"
+              className="data-[state=active]:bg-white"
+            >
               Informações Pessoais
             </TabsTrigger>
-            <TabsTrigger value="payment" className="data-[state=active]:bg-white">
+            <TabsTrigger
+              value="payment"
+              className="data-[state=active]:bg-white"
+            >
               Métodos de Pagamento
             </TabsTrigger>
           </TabsList>
 
+          {/* Aba Informações Pessoais */}
           <TabsContent value="personal" className="mt-6">
             <div className="glass-card p-5 rounded-xl">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-lg font-semibold text-gray-800">Informações Pessoais</h2>
+                <h2 className="text-lg font-semibold text-gray-800">
+                  Informações Pessoais
+                </h2>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -170,7 +229,11 @@ const Profile: React.FC = () => {
                 <div className="flex items-center mb-4">
                   <div className="h-16 w-16 rounded-full overflow-hidden bg-eco-green-100 flex items-center justify-center text-eco-green-600 text-xl font-semibold mr-4">
                     {fotoPerfil ? (
-                      <img src={fotoPerfil} alt="Foto do perfil" className="h-full w-full object-cover" />
+                      <img
+                        src={fotoPerfil}
+                        alt="Foto do perfil"
+                        className="h-full w-full object-cover"
+                      />
                     ) : (
                       userData.name
                         .split(" ")
@@ -180,13 +243,19 @@ const Profile: React.FC = () => {
                     )}
                   </div>
                   <div>
-                    <h3 className="font-medium text-gray-900">{userData.name}</h3>
-                    <p className="text-sm text-gray-500">Membro desde Maio 2023</p>
+                    <h3 className="font-medium text-gray-900">
+                      {userData.name}
+                    </h3>
+                    <p className="text-sm text-gray-500">
+                      Membro desde {formatarMesAno(userData.dataRegistro)}
+                    </p>
                   </div>
                 </div>
 
                 <div>
-                  <p className="text-sm font-medium text-gray-500">Código de Cadastro</p>
+                  <p className="text-sm font-medium text-gray-500">
+                    Código de Cadastro
+                  </p>
                   <p className="text-gray-800 font-mono bg-eco-green-50 px-3 py-1 rounded inline-block">
                     {userData.registrationCode}
                   </p>
@@ -195,7 +264,10 @@ const Profile: React.FC = () => {
                 {isEditing ? (
                   <div className="space-y-4">
                     <div>
-                      <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                      <label
+                        htmlFor="name"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                      >
                         Nome
                       </label>
                       <input
@@ -205,11 +277,16 @@ const Profile: React.FC = () => {
                         disabled
                         className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-100 cursor-not-allowed"
                       />
-                      <p className="text-xs text-gray-500 mt-1">Nome não pode ser alterado</p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Nome não pode ser alterado
+                      </p>
                     </div>
 
                     <div>
-                      <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                      <label
+                        htmlFor="email"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                      >
                         Email
                       </label>
                       <input
@@ -219,11 +296,16 @@ const Profile: React.FC = () => {
                         disabled
                         className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-100 cursor-not-allowed"
                       />
-                      <p className="text-xs text-gray-500 mt-1">Email não pode ser alterado</p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Email não pode ser alterado
+                      </p>
                     </div>
 
                     <div>
-                      <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+                      <label
+                        htmlFor="phone"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                      >
                         Telefone
                       </label>
                       <input
@@ -239,6 +321,29 @@ const Profile: React.FC = () => {
                           setUserData({ ...userData, phone: formatado });
                         }}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-eco-green-500 focus:border-eco-green-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label
+                        htmlFor="imagem"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                      >
+                        Foto de Perfil
+                      </label>
+                      <input
+                        type="file"
+                        id="imagem"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            setImagemSelecionada(file);
+                            const urlPreview = URL.createObjectURL(file);
+                            setFotoPerfil(urlPreview); // Mostra preview
+                          }
+                        }}
+                        className="block w-full text-sm text-gray-700 border border-gray-300 rounded-md p-2 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:bg-eco-green-100 file:text-eco-green-700 hover:file:bg-eco-green-200"
                       />
                     </div>
 
@@ -262,7 +367,9 @@ const Profile: React.FC = () => {
                     </div>
 
                     <div>
-                      <p className="text-sm font-medium text-gray-500">Telefone</p>
+                      <p className="text-sm font-medium text-gray-500">
+                        Telefone
+                      </p>
                       <p className="text-gray-800">{userData.phone}</p>
                     </div>
                   </div>
@@ -271,7 +378,63 @@ const Profile: React.FC = () => {
             </div>
           </TabsContent>
 
-          {/* TabsContent de pagamentos continua igual */}
+          {/* Aba Métodos de Pagamento */}
+          <TabsContent value="payment" className="mt-6">
+            <div className="glass-card p-5 rounded-xl space-y-4">
+              {paymentMethods.length === 0 ? (
+                <p className="text-gray-500">
+                  Nenhum método de pagamento cadastrado.
+                </p>
+              ) : (
+                paymentMethods.map((method) => (
+                  <div
+                    key={method.id}
+                    className="flex justify-between items-center border-b border-gray-200 pb-3"
+                  >
+                    <div>
+                      <p className="font-medium">{method.type}</p>
+                      <p className="text-sm text-gray-600">{method.info}</p>
+                      <p className="text-sm text-gray-600">{method.holder}</p>
+                      {method.expiry && (
+                        <p className="text-sm text-gray-600">
+                          Validade: {method.expiry}
+                        </p>
+                      )}
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDeletePaymentMethod(method.id)}
+                      className="text-red-500"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                ))
+              )}
+              <Button
+                variant="outline"
+                className="w-full mt-4 flex items-center justify-center"
+                onClick={() => setIsCardDialogOpen(true)}
+              >
+                <PlusCircle className="w-5 h-5 mr-2" /> Adicionar Novo Cartão
+              </Button>
+
+              <Dialog
+                open={isCardDialogOpen}
+                onOpenChange={setIsCardDialogOpen}
+              >
+                <DialogTrigger />
+                <DialogContent>
+                  <CardForm
+                    onSubmit={(cardData) => {
+                      handleAddCard(cardData);
+                    }}
+                  />
+                </DialogContent>
+              </Dialog>
+            </div>
+          </TabsContent>
         </Tabs>
       </div>
     </Layout>

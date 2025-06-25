@@ -8,6 +8,7 @@ export type UsuarioResposta = {
   empresa: string;
   cnpj: string;
   telefone: string;
+  dataCadastro : string;
 };
 
 // Buscar usuário logado
@@ -42,6 +43,7 @@ export async function atualizarTelefone(token: string, telefone: string): Promis
 }
 
 // Buscar imagem do usuário (retorna URL temporária)
+
 export async function buscarImagemUsuario(token: string): Promise<string> {
   try {
     const resposta = await api.get("/api/Usuario/Buscar-imagem", {
@@ -51,6 +53,23 @@ export async function buscarImagemUsuario(token: string): Promise<string> {
 
     const urlImagem = URL.createObjectURL(resposta.data);
     return urlImagem;
+  } catch (error) {
+    tratarErroAPI(error);
+    throw error;
+  }
+}
+// Atualizar ou Adicionar foto de usuario.
+export async function AddOuAtualizarImgUsuario(token: string, imagem: File): Promise<void> {
+  try {
+    const formData = new FormData();
+    formData.append("imagem", imagem); 
+
+    await api.put("/api/Usuario/SalvarOuAtualizarImagem", formData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "multipart/form-data",
+      },
+    });
   } catch (error) {
     tratarErroAPI(error);
     throw error;
