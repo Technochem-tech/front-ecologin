@@ -105,7 +105,7 @@ const Index: React.FC = () => {
                   htmlFor="email"
                   className="block text-sm font-medium text-gray-700"
                 >
-                  E-mail ou CPF/CNPJ
+                  E-mail ou CNPJ
                 </label>
                 <div className="mt-1">
                   <input
@@ -193,12 +193,12 @@ const Index: React.FC = () => {
 
             <div className="mt-6 flex items-center justify-between">
               <div className="text-sm">
-                <a
-                  href="#"
+                <Link
+                  to="esqueci-senha"
                   className="font-medium text-eco-green-600 hover:text-eco-green-500"
                 >
                   Esqueci minha senha
-                </a>
+                </Link>
               </div>
               <div className="text-sm">
                 <Link

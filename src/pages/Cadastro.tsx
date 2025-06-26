@@ -7,7 +7,6 @@ import { cadastrarUsuario, UsuarioCadastro } from '@/services/Usuario';
 import { AxiosError } from 'axios';
 import { toast } from 'sonner';
 
-// Função para remover máscara (pega apenas números)
 const limparMascara = (valor: string) => valor.replace(/\D/g, '');
 
 const Cadastro: React.FC = () => {
@@ -70,9 +69,9 @@ const Cadastro: React.FC = () => {
       await cadastrarUsuario(dados);
       toast.success('Conta criada com sucesso! ✅');
       setTimeout(() => navigate('/'), 10000);
-    } catch (error: unknown) {
-      const err = error as AxiosError<any>;
-      const msg = err.response?.data?.toString().toLowerCase() || '';
+    } catch (error) {
+      const err = error as AxiosError<{ mensagem?: string }>;
+      const msg = err.response?.data?.mensagem?.toLowerCase() || '';
 
       if (err.response?.status === 400) {
         if (msg.includes('email')) {
