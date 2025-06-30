@@ -1,5 +1,5 @@
 import api from "./api";
-import { tratarErroAPI } from "@/utils/tratarErroAPI"; // ajuste o caminho conforme seu projeto
+import { tratarErroAPI } from "@/utils/tratarErroAPI"; 
 
 export type UsuarioResposta = {
   id: number;
