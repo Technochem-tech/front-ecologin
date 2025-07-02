@@ -1,170 +1,174 @@
-
-import React, { useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import Layout from '@/components/Layout';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, CreditCard, AlertCircle, Leaf } from 'lucide-react';
+import { ArrowLeft, AlertCircle, Leaf } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
-import BankAccountForm from '@/components/BankAccountForm';
 import { toast } from "sonner";
+import { getSaldoCreditos } from "@/services/getSaldo";
+import { venderCreditos } from "@/services/VenderCreditos";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+
+const VALOR_UNITARIO_CREDITO = 0.05;
+
+interface RespostaVenda {
+  mensagem?: string;
+  msg?: string;
+}
 
 const SellCredits: React.FC = () => {
   const navigate = useNavigate();
   const [amount, setAmount] = useState<string>('');
-  const [selectedAccount, setSelectedAccount] = useState<number | null>(0); // Default to first account
-  
-  const accounts = [
-    {
-      id: 1,
-      bankName: 'Banco do Brasil',
-      accountType: 'Conta Corrente',
-      accountNumber: '12345-6',
-      agency: '1234',
-    }
-  ];
+  const [saldoCreditos, setSaldoCreditos] = useState<number>(0);
+  const [abrirModal, setAbrirModal] = useState(false);
+  const [confirmando, setConfirmando] = useState(false);
 
-  const handleSell = () => {
-    if (!amount || parseFloat(amount) <= 0) {
+  const token = localStorage.getItem("token") || "";
+
+  const buscarSaldo = useCallback(async () => {
+    try {
+      const resposta = await getSaldoCreditos(token);
+      setSaldoCreditos(resposta.saldoemconta);
+    } catch (error) {
+      toast.error("Erro ao buscar saldo de créditos.");
+    }
+  }, [token]);
+
+  useEffect(() => {
+    buscarSaldo();
+  }, [buscarSaldo]);
+
+  const quantidade = parseFloat(amount || '0');
+  const valorEstimado = quantidade * VALOR_UNITARIO_CREDITO;
+
+  const handleConfirmarVenda = async () => {
+    setConfirmando(true);
+    try {
+      const resposta = await venderCreditos(token, { quantidadeCreditos: quantidade });
+
+      let mensagem = "Venda realizada com sucesso.";
+      if (typeof resposta === "string") {
+        mensagem = resposta;
+      } else if (resposta && typeof resposta === "object") {
+        const r = resposta as RespostaVenda;
+        mensagem = r.mensagem || r.msg || mensagem;
+      }
+
+      toast.success(mensagem);
+      buscarSaldo();
+      setAmount("");
+    } catch {
+      toast.error("Erro ao vender créditos.");
+    } finally {
+      setAbrirModal(false);
+      setConfirmando(false);
+    }
+  };
+
+  const handleAbrirModal = () => {
+    if (!amount || quantidade <= 0) {
       toast.error("Por favor, informe uma quantidade válida de créditos.");
       return;
     }
-    
-    if (parseFloat(amount) > 3.2) {
+
+    if (quantidade > saldoCreditos) {
       toast.error("Você não possui créditos suficientes.");
       return;
     }
-    
-    if (selectedAccount === null) {
-      toast.error("Por favor, selecione uma conta para receber o valor.");
-      return;
-    }
-    
-    toast.success(`Venda de ${amount} toneladas de CO₂ realizada com sucesso!`);
-    setTimeout(() => navigate('/dashboard'), 2000);
-  };
 
-  const calculatedValue = parseFloat(amount || '0') * 40; // R$40 por tonelada
+    setAbrirModal(true);
+  };
 
   return (
     <Layout showNavbar>
       <div className="min-h-screen pt-6 pb-20 page-transition">
         <div className="mb-6 flex items-center">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={() => navigate('/dashboard')}
-            className="mr-2"
-          >
+          <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')} className="mr-2">
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <h1 className="text-2xl font-bold">Vender Créditos de Carbono</h1>
         </div>
-        
+
         <div className="mb-6 glass-card p-5 rounded-xl">
           <div className="flex items-center mb-4">
             <Leaf className="text-eco-blue-500 mr-2 h-5 w-5" />
             <h2 className="text-lg font-medium">Seus Créditos Disponíveis</h2>
           </div>
-          <div className="flex items-end mb-4">
-            <span className="text-2xl font-semibold text-gray-900">3.2</span>
+          <div className="flex items-end mb-2">
+            <span className="text-2xl font-semibold text-gray-900">{saldoCreditos}</span>
             <span className="ml-1 text-gray-600 text-sm mb-1">Toneladas CO₂</span>
           </div>
-          <div className="text-sm text-gray-500">Valor aproximado: R$ 128,00</div>
-        </div>
-        
-        <div className="mb-6 glass-card p-5 rounded-xl">
-          <div className="flex items-center mb-4">
-            <h2 className="text-lg font-medium">Quanto deseja vender?</h2>
+          <div className="text-sm text-gray-500">
+            Valor aproximado: R$ {(saldoCreditos * VALOR_UNITARIO_CREDITO).toFixed(2)}
           </div>
-          <div className="mb-2">
-            <div className="relative">
-              <Input
-                type="number"
-                placeholder="0.00"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                max={3.2}
-                step={0.1}
-              />
-              <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                <span className="text-gray-500">Ton CO₂</span>
-              </div>
+        </div>
+
+        <div className="mb-6 glass-card p-5 rounded-xl">
+          <h2 className="text-lg font-medium mb-4">Quanto deseja vender?</h2>
+          <div className="relative mb-2">
+            <Input
+              type="number"
+              placeholder="0.00"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              max={saldoCreditos}
+              step={0.1}
+            />
+            <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+              <span className="text-gray-500">Ton CO₂</span>
             </div>
           </div>
           <div className="text-sm text-gray-600 flex items-center justify-between">
             <span>Valor estimado:</span>
-            <span className="font-medium text-eco-blue-600">R$ {calculatedValue.toFixed(2)}</span>
+            <span className="font-medium text-eco-blue-600">R$ {valorEstimado.toFixed(2)}</span>
           </div>
-          {parseFloat(amount || '0') > 3.2 && (
+          {quantidade > saldoCreditos && (
             <div className="mt-2 text-sm text-red-500 flex items-center">
               <AlertCircle className="h-4 w-4 mr-1" />
               <span>Você não possui créditos suficientes</span>
             </div>
           )}
         </div>
-        
+
         <div className="glass-card p-5 rounded-xl mb-6">
-          <h2 className="text-lg font-medium mb-4">Receber em</h2>
-          <div className="space-y-3">
-            {accounts.map((account, index) => (
-              <div 
-                key={account.id}
-                className={`flex items-center justify-between p-3 bg-white rounded-lg border ${
-                  selectedAccount === index ? 'border-eco-blue-500' : 'border-gray-200'
-                }`}
-                onClick={() => setSelectedAccount(index)}
-              >
-                <div className="flex items-center">
-                  <div className="w-10 h-10 bg-eco-blue-100 rounded-full flex items-center justify-center mr-3">
-                    <CreditCard className="h-5 w-5 text-eco-blue-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-medium">{account.bankName}</h3>
-                    <p className="text-sm text-gray-500">
-                      {account.accountType} - Ag: {account.agency} Conta: {account.accountNumber}
-                    </p>
-                  </div>
-                </div>
-                <input 
-                  type="radio" 
-                  name="account" 
-                  checked={selectedAccount === index}
-                  onChange={() => setSelectedAccount(index)}
-                  className="h-4 w-4 text-eco-blue-600" 
-                />
-              </div>
-            ))}
-            
-            <Drawer>
-              <DrawerTrigger asChild>
-                <Button variant="outline" className="w-full justify-start">
-                  <span className="mr-2">+</span> Adicionar Conta Bancária
-                </Button>
-              </DrawerTrigger>
-              <DrawerContent className="p-6">
-                <DrawerHeader>
-                  <DrawerTitle>Cadastrar Conta Bancária</DrawerTitle>
-                </DrawerHeader>
-                <BankAccountForm />
-              </DrawerContent>
-            </Drawer>
+          <h2 className="text-lg font-medium mb-4">Onde vou receber?</h2>
+          <div className="text-sm text-gray-700 leading-relaxed bg-yellow-50 border border-yellow-300 p-4 rounded-lg">
+            <p className="mb-2"><strong>Conta bancária padrão para recebimento</strong></p>
+            <p>
+              O valor da venda será creditado automaticamente na sua conta de saldo.<br />
+              Caso deseje sacar esse valor em reais, entre em contato com nossa equipe pelo e-mail&nbsp;
+              <span className="font-medium text-yellow-900">suporte@ecocreditos.com.br</span>
+              &nbsp;para seguir com o processo de retirada.
+            </p>
           </div>
         </div>
-        
-        <Button 
-          onClick={handleSell}
+
+        <Button
+          onClick={handleAbrirModal}
           className="w-full bg-eco-blue-600 hover:bg-eco-blue-700 py-6"
-          disabled={
-            !amount || 
-            parseFloat(amount) <= 0 || 
-            parseFloat(amount) > 3.2 || 
-            selectedAccount === null
-          }
+          disabled={!amount || quantidade <= 0 || quantidade > saldoCreditos}
         >
           Vender Créditos
         </Button>
+
+        {/* Modal de confirmação */}
+        <Dialog open={abrirModal} onOpenChange={setAbrirModal}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Confirmar Venda</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-2 text-gray-700">
+              <p>Você está prestes a vender <strong>{quantidade}</strong> toneladas de CO₂.</p>
+              <p>Você irá receber aproximadamente <strong>R$ {valorEstimado.toFixed(2)}</strong>.</p>
+            </div>
+            <DialogFooter className="pt-4">
+              <Button variant="ghost" onClick={() => setAbrirModal(false)}>Cancelar</Button>
+              <Button onClick={handleConfirmarVenda} disabled={confirmando}>
+                {confirmando ? "Processando..." : "Confirmar Venda"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </Layout>
   );
