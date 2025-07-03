@@ -7,7 +7,7 @@ import { ArrowLeft, ShoppingCart, Leaf, Info } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { ListarProjetos } from "@/services/projetos";
-import { iniciarCompra } from "@/services/ComprarCreditos";
+import { iniciarCompra, verificarStatusPagamento } from "@/services/ComprarCreditos";
 import QRCode from "react-qr-code";
 import FooterNav from "@/components/FooterNav";
 
@@ -33,6 +33,8 @@ const BuyCredits: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [compra, setCompra] = useState<CompraResponse | null>(null);
 
+  const TONELADAS_MINIMAS = 0.01;
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -46,6 +48,29 @@ const BuyCredits: React.FC = () => {
       .catch(() => toast.error("Erro ao carregar projetos."));
   }, [navigate]);
 
+  useEffect(() => {
+    if (!compra?.pagamentoId) return;
+
+    const interval = setInterval(async () => {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      try {
+        const statusResp = await verificarStatusPagamento(token, compra.pagamentoId);
+        const status = statusResp.status.toLowerCase();
+
+        if (status === "approved") {
+          toast.success("✅ Pagamento aprovado com sucesso!");
+          clearInterval(interval);
+        }
+      } catch {
+        // erro silencioso
+      }
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, [compra]);
+
   const toneladasAproximadas = () => {
     if (!amount || selectedProject === null) return "0.00";
     const valor = parseFloat(amount);
@@ -56,6 +81,8 @@ const BuyCredits: React.FC = () => {
   };
 
   const handleBuy = async () => {
+    const toneladas = parseFloat(toneladasAproximadas());
+
     if (!amount || parseFloat(amount) <= 0) {
       toast.error("Por favor, informe um valor válido.");
       return;
@@ -64,6 +91,11 @@ const BuyCredits: React.FC = () => {
       toast.error("Por favor, selecione um projeto.");
       return;
     }
+    if (toneladas < TONELADAS_MINIMAS) {
+      toast.error(`O valor mínimo precisa resultar em pelo menos ${TONELADAS_MINIMAS.toFixed(2)} toneladas de CO₂.`);
+      return;
+    }
+
     const token = localStorage.getItem("token");
     if (!token) {
       toast.error("Faça login para continuar.");
@@ -81,9 +113,9 @@ const BuyCredits: React.FC = () => {
       const response = await iniciarCompra(token, dadosCompra);
       setCompra(response);
       toast.success("Compra iniciada com sucesso!");
-    } catch (error: any) {
+    } catch (error) {
       if (error.response?.data?.erro) {
-        toast.error(error.response.data.erro); // <- mensagem personalizada da API
+        toast.error(error.response.data.erro);
       } else {
         toast.error("Erro ao iniciar compra.");
       }
@@ -97,6 +129,31 @@ const BuyCredits: React.FC = () => {
       toast.warning("Selecione um projeto antes de digitar o valor.");
     }
     setAmount(value);
+  };
+
+  const checarStatusPagamento = async () => {
+    const token = localStorage.getItem("token");
+    if (!token || !compra?.pagamentoId) {
+      toast.error("Nenhum pagamento para verificar.");
+      return;
+    }
+
+    try {
+      const statusResp = await verificarStatusPagamento(token, compra.pagamentoId);
+      const status = statusResp.status.toLowerCase();
+
+      if (status === "approved") {
+        toast.success("✅ Pagamento aprovado com sucesso!");
+      } else if (status === "pending") {
+        toast.warning("⏳ Pagamento ainda está pendente.");
+      } else if (status === "expired") {
+        toast.error("❌ Pagamento expirado. Tente novamente.");
+      } else {
+        toast(`⚠️ Status do pagamento: ${status}`);
+      }
+    } catch {
+      toast.error("Erro ao verificar status do pagamento.");
+    }
   };
 
   return (
@@ -209,13 +266,16 @@ const BuyCredits: React.FC = () => {
             onClick={handleBuy}
             className="w-full bg-eco-green-600 hover:bg-eco-green-700 py-6"
             disabled={
-              !amount || parseFloat(amount) <= 0 || selectedProject === null
+              !amount ||
+              parseFloat(amount) <= 0 ||
+              selectedProject === null ||
+              parseFloat(toneladasAproximadas()) < TONELADAS_MINIMAS
             }
           >
             Finalizar Compra
           </Button>
 
-          {/* QRCODE */}
+          {/* QRCODE E BOTÃO STATUS */}
           {compra && (
             <div className="mt-6 p-6 bg-white rounded-xl border shadow-md flex flex-col items-center space-y-6 max-w-md mx-auto">
               <h3 className="text-xl font-semibold text-gray-800">
@@ -265,6 +325,13 @@ const BuyCredits: React.FC = () => {
                   </div>
                 </div>
               </div>
+
+              <Button
+                onClick={checarStatusPagamento}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4"
+              >
+                Já fez o pagamento?
+              </Button>
             </div>
           )}
         </div>

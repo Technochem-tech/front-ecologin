@@ -4,18 +4,29 @@ import BalanceCard from "@/components/BalanceCard";
 import CarbonCreditsCard from "@/components/CarbonCreditsCard";
 import ActionButton from "@/components/ActionButton";
 import ProjectCard from "@/components/ProjectCard";
-import FooterNav from "@/components/FooterNav"; 
+import FooterNav from "@/components/FooterNav";
 
 import { useNavigate } from "react-router-dom";
 import React, { useEffect, useState } from "react";
 import { getSaldo, getSaldoCreditos } from "@/services/getSaldo";
 import { usuario, UsuarioResposta } from "@/services/Usuario";
+import { ListarProjetos } from "@/services/projetos";
+
+interface Projeto {
+  id: number;
+  titulo: string;
+  valor: number;
+  descricao: string;
+  imgBase64: string;
+  creditosDisponivel: number;
+}
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const [saldo, setSaldo] = useState<number | null>(null);
   const [saldoCredito, setSaldoCredito] = useState<number | null>(null);
   const [usuarioLogado, setUsuarioLogado] = useState<UsuarioResposta | null>(null);
+  const [projects, setProjects] = useState<Projeto[]>([]);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -66,6 +77,25 @@ const Dashboard: React.FC = () => {
     carregarUsuario();
   }, [navigate]);
 
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      navigate("/");
+      return;
+    }
+
+    const buscarProjetos = async () => {
+      try {
+        const dados = await ListarProjetos(token);
+        setProjects(dados);
+      } catch (error) {
+        console.error("Erro ao buscar projetos:", error);
+      }
+    };
+
+    buscarProjetos();
+  }, [navigate]);
+
   const handleActionClick = (action: string) => {
     switch (action) {
       case "buy":
@@ -82,38 +112,12 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  const projects = [
-    {
-      id: 1,
-      title: "Reflorestamento Amazônia",
-      description: "Projeto de recuperação de áreas degradadas na Amazônia Brasileira.",
-      price: "R$ 45,00",
-      image: "https://images.unsplash.com/photo-1586974710160-55f48f417990?q=80&w=2564&auto=format&fit=crop",
-    },
-    {
-      id: 2,
-      title: "Energia Solar Nordeste",
-      description: "Implementação de painéis solares em comunidades rurais do nordeste.",
-      price: "R$ 38,50",
-      image: "https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?q=80&w=2672&auto=format&fit=crop",
-    },
-    {
-      id: 3,
-      title: "Biodigestores Rurais",
-      description: "Conversão de resíduos orgânicos em energia limpa para propriedades rurais.",
-      price: "R$ 42,75",
-      image: "https://images.unsplash.com/photo-1471193945509-9ad0617afabf?q=80&w=2670&auto=format&fit=crop",
-    },
-  ];
-
   return (
     <Layout showNavbar>
       <div className="min-h-screen pt-6 pb-24 page-transition">
         <header className={`mb-8 transition-opacity duration-700 ${usuarioLogado ? "opacity-100 animate-fade-in" : "opacity-0"}`}>
           <div className="flex justify-between items-center">
-            <div>
-              <p className="text-sm text-eco-green-700">Seu impacto positivo continua!</p>
-            </div>
+            <p className="text-sm text-eco-green-700">Seu impacto positivo continua!</p>
           </div>
         </header>
 
@@ -145,7 +149,10 @@ const Dashboard: React.FC = () => {
             <div className="h-32 w-full flex items-end space-x-2">
               {[35, 28, 45, 32, 55, 42, 60, 55, 65, 72, 68, 78].map((height, i) => (
                 <div key={i} className="flex-1 flex flex-col items-center">
-                  <div className="w-full bg-gradient-to-t from-eco-green-500 to-eco-blue-400 rounded-t-sm opacity-80" style={{ height: `${height}%` }}></div>
+                  <div
+                    className="w-full bg-gradient-to-t from-eco-green-500 to-eco-blue-400 rounded-t-sm opacity-80"
+                    style={{ height: `${height}%` }}
+                  ></div>
                   <span className="text-xs text-gray-500 mt-1">
                     {["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"][i]}
                   </span>
@@ -167,25 +174,27 @@ const Dashboard: React.FC = () => {
         <section>
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-base font-medium text-gray-900">Projetos Sustentáveis</h2>
-            <a href="#" className="text-sm text-eco-green-600 flex items-center">
+            <button
+              onClick={() => navigate("/buy-credits")}
+              className="text-sm text-eco-green-600 flex items-center"
+            >
               Ver todos <ChevronRight className="h-4 w-4" />
-            </a>
+            </button>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             {projects.map((project) => (
               <ProjectCard
                 key={project.id}
-                title={project.title}
-                description={project.description}
-                price={project.price}
-                image={project.image}
+                title={project.titulo}
+                description={project.descricao}
+                price={`R$ ${project.valor.toFixed(2)}`}
+                image={`data:image/jpeg;base64,${project.imgBase64}`}
               />
             ))}
           </div>
         </section>
       </div>
 
-      {/* ✅ Rodapé fixo com navegação */}
       <FooterNav />
     </Layout>
   );

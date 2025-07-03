@@ -24,3 +24,22 @@ export async function iniciarCompra(token: string, dados: CompraRequest): Promis
     throw error;
   }
 }
+
+interface StatusPagamentoResponse {
+  idPagamento: string;
+  status: string; // "pending", "approved", "failed", etc.
+}
+
+export async function verificarStatusPagamento(token: string, idPagamento: string): Promise<StatusPagamentoResponse> {
+  try {
+    const response = await api.get<StatusPagamentoResponse>(`/api/Pagamento/status/${idPagamento}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    tratarErroAPI(error);
+    throw error;
+  }
+}
