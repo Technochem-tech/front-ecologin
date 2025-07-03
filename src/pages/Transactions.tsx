@@ -1,9 +1,26 @@
-
 import React from 'react';
 import Layout from '@/components/Layout';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ArrowDownUp, ArrowUp, ArrowDown, Search } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import FooterNav from '@/components/FooterNav'; // ⬅️ Adicionado
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
+} from '@/components/ui/table';
+import {
+  ArrowDownUp,
+  ArrowUp,
+  ArrowDown,
+  Search
+} from 'lucide-react';
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger
+} from '@/components/ui/tabs';
 
 interface Transaction {
   id: string;
@@ -76,7 +93,7 @@ const mockTransactions: Transaction[] = [
 const Transactions: React.FC = () => {
   return (
     <Layout showNavbar>
-      <div className="min-h-screen pt-6 pb-20">
+      <div className="min-h-screen pt-6 pb-28"> {/* espaço extra p/ o footer */}
         <header className="mb-6">
           <h1 className="text-2xl font-bold text-gray-900">Histórico de Transações</h1>
           <p className="text-sm text-gray-600">Acompanhe todas as suas movimentações</p>
@@ -102,24 +119,26 @@ const Transactions: React.FC = () => {
             <TabsTrigger value="sale" className="data-[state=active]:bg-white">Vendas</TabsTrigger>
             <TabsTrigger value="transfer" className="data-[state=active]:bg-white">Transferências</TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="all" className="mt-4">
             <TransactionTable transactions={mockTransactions} />
           </TabsContent>
-          
+
           <TabsContent value="purchase" className="mt-4">
             <TransactionTable transactions={mockTransactions.filter(t => t.type === 'purchase')} />
           </TabsContent>
-          
+
           <TabsContent value="sale" className="mt-4">
             <TransactionTable transactions={mockTransactions.filter(t => t.type === 'sale')} />
           </TabsContent>
-          
+
           <TabsContent value="transfer" className="mt-4">
             <TransactionTable transactions={mockTransactions.filter(t => t.type === 'transfer')} />
           </TabsContent>
         </Tabs>
       </div>
+
+      <FooterNav /> {/* ⬅️ Componente de navegação inferior */}
     </Layout>
   );
 };
@@ -158,10 +177,10 @@ const TransactionTable: React.FC<{ transactions: Transaction[] }> = ({ transacti
                   </div>
                 </TableCell>
                 <TableCell className={`text-right font-medium ${
-                  transaction.type === 'purchase' 
-                    ? 'text-eco-green-500' 
-                    : transaction.type === 'sale' 
-                      ? 'text-eco-blue-500' 
+                  transaction.type === 'purchase'
+                    ? 'text-eco-green-500'
+                    : transaction.type === 'sale'
+                      ? 'text-eco-blue-500'
                       : 'text-gray-600'
                 }`}>
                   {transaction.amount}

@@ -7,6 +7,8 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import CardForm from "@/components/CardForm";
+import FooterNav from "@/components/FooterNav"; // Importa rodapé fixo
+
 import {
   UsuarioResposta,
   usuario,
@@ -105,7 +107,7 @@ const Profile: React.FC = () => {
     const telefoneFoiAlterado = rawPhone !== telefoneOriginal;
 
     try {
-      // Atualiza telefone se estiver editando e houver alteração
+      // Atualiza telefone se estiver editando e houve alteração
       if (isEditing && telefoneFoiAlterado) {
         if (rawPhone.length !== 11) {
           toast.error("Número de telefone inválido.");
@@ -114,7 +116,7 @@ const Profile: React.FC = () => {
         await atualizarTelefone(token, rawPhone);
       }
 
-      // Atualiza imagem se uma nova foi selecionada
+      // Atualiza imagem se nova foi selecionada
       if (imagemSelecionada) {
         await AddOuAtualizarImgUsuario(token, imagemSelecionada);
         const novaImagem = await buscarImagemUsuario(token);
@@ -153,7 +155,7 @@ const Profile: React.FC = () => {
 
   return (
     <Layout showNavbar>
-      <div className="min-h-screen pt-6 pb-20">
+      <div className="min-h-screen pt-6 pb-28"> {/* padding maior para FooterNav */}
         <header className="mb-8">
           <div className="flex items-center mb-2">
             <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")} className="mr-2">
@@ -166,8 +168,12 @@ const Profile: React.FC = () => {
 
         <Tabs defaultValue="personal" className="mb-8">
           <TabsList className="grid grid-cols-2 w-full bg-eco-green-50 p-1 rounded-lg">
-            <TabsTrigger value="personal" className="data-[state=active]:bg-white">Informações Pessoais</TabsTrigger>
-            <TabsTrigger value="payment" className="data-[state=active]:bg-white">Métodos de Pagamento</TabsTrigger>
+            <TabsTrigger value="personal" className="data-[state=active]:bg-white">
+              Informações Pessoais
+            </TabsTrigger>
+            <TabsTrigger value="payment" className="data-[state=active]:bg-white">
+              Métodos de Pagamento
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="personal" className="mt-6">
@@ -190,7 +196,11 @@ const Profile: React.FC = () => {
                     {fotoPerfil ? (
                       <img src={fotoPerfil} alt="Foto do perfil" className="h-full w-full object-cover" />
                     ) : (
-                      userData.name.split(" ").map((n) => n[0]).join("").slice(0, 2)
+                      userData.name
+                        .split(" ")
+                        .map((n) => n[0])
+                        .join("")
+                        .slice(0, 2)
                     )}
                   </div>
                   <div>
@@ -209,7 +219,9 @@ const Profile: React.FC = () => {
                 {isEditing ? (
                   <div className="space-y-4">
                     <div>
-                      <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">Nome</label>
+                      <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                        Nome
+                      </label>
                       <input
                         type="text"
                         id="name"
@@ -220,7 +232,9 @@ const Profile: React.FC = () => {
                     </div>
 
                     <div>
-                      <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                      <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                        Email
+                      </label>
                       <input
                         type="email"
                         id="email"
@@ -231,7 +245,9 @@ const Profile: React.FC = () => {
                     </div>
 
                     <div>
-                      <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
+                      <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+                        Telefone
+                      </label>
                       <input
                         type="tel"
                         id="phone"
@@ -268,10 +284,7 @@ const Profile: React.FC = () => {
                       />
                     </div>
 
-                    <Button
-                      onClick={handleSaveChanges}
-                      className="w-full bg-eco-green-600 hover:bg-eco-green-700"
-                    >
+                    <Button onClick={handleSaveChanges} className="w-full bg-eco-green-600 hover:bg-eco-green-700">
                       Salvar Alterações
                     </Button>
                   </div>
@@ -301,14 +314,15 @@ const Profile: React.FC = () => {
                 <p className="text-gray-500">Nenhum método de pagamento cadastrado.</p>
               ) : (
                 paymentMethods.map((method) => (
-                  <div key={method.id} className="flex justify-between items-center border-b border-gray-200 pb-3">
+                  <div
+                    key={method.id}
+                    className="flex justify-between items-center border-b border-gray-200 pb-3"
+                  >
                     <div>
                       <p className="font-medium">{method.type}</p>
                       <p className="text-sm text-gray-600">{method.info}</p>
                       <p className="text-sm text-gray-600">{method.holder}</p>
-                      {method.expiry && (
-                        <p className="text-sm text-gray-600">Validade: {method.expiry}</p>
-                      )}
+                      {method.expiry && <p className="text-sm text-gray-600">Validade: {method.expiry}</p>}
                     </div>
                     <Button
                       variant="ghost"
@@ -333,17 +347,15 @@ const Profile: React.FC = () => {
               <Dialog open={isCardDialogOpen} onOpenChange={setIsCardDialogOpen}>
                 <DialogTrigger />
                 <DialogContent>
-                  <CardForm
-                    onSubmit={(cardData: CardData) => {
-                      handleAddCard(cardData);
-                    }}
-                  />
+                  <CardForm onSubmit={(cardData: CardData) => handleAddCard(cardData)} />
                 </DialogContent>
               </Dialog>
             </div>
           </TabsContent>
         </Tabs>
       </div>
+
+      <FooterNav /> {/* Rodapé fixo */}
     </Layout>
   );
 };
