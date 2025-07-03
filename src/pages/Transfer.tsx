@@ -20,6 +20,7 @@ import {
 } from "@/services/tranferencia";
 
 import { getSaldo, getSaldoCreditos } from "@/services/getSaldo";
+import FooterNav from "@/components/FooterNav"; // <== Rodapé adicionado aqui
 
 interface Destinatario {
   nome: string;
@@ -162,7 +163,7 @@ const Transfer: React.FC = () => {
 
   return (
     <Layout showNavbar>
-      <div className="min-h-screen pt-6 pb-20 page-transition">
+      <div className="min-h-screen pt-6 pb-28 page-transition">
         <div className="mb-6 flex items-center">
           <Button
             variant="ghost"
@@ -319,6 +320,8 @@ const Transfer: React.FC = () => {
           </DialogContent>
         </Dialog>
       </div>
+
+      <FooterNav /> {/* <- Rodapé fixo aqui */}
     </Layout>
   );
 };
