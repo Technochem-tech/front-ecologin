@@ -35,7 +35,9 @@ const Profile: React.FC = () => {
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [isCardDialogOpen, setIsCardDialogOpen] = useState(false);
-  const [usuarioLogado, setUsuarioLogado] = useState<UsuarioResposta | null>(null);
+  const [usuarioLogado, setUsuarioLogado] = useState<UsuarioResposta | null>(
+    null
+  );
   const [fotoPerfil, setFotoPerfil] = useState<string | null>(null);
   const [imagemSelecionada, setImagemSelecionada] = useState<File | null>(null);
   const [telefoneOriginal, setTelefoneOriginal] = useState<string>("");
@@ -85,7 +87,10 @@ const Profile: React.FC = () => {
 
   useEffect(() => {
     if (usuarioLogado) {
-      const codigoFormatado = `ECO-010${String(usuarioLogado.id).padStart(6, "0")}`;
+      const codigoFormatado = `ECO-010${String(usuarioLogado.id).padStart(
+        6,
+        "0"
+      )}`;
       setUserData({
         name: usuarioLogado.nome,
         email: usuarioLogado.email,
@@ -126,7 +131,8 @@ const Profile: React.FC = () => {
       setIsEditing(false);
       toast.success("Dados atualizados com sucesso!");
     } catch (error: any) {
-      const mensagem = error?.response?.data?.mensagem || "Erro ao salvar alterações.";
+      const mensagem =
+        error?.response?.data?.mensagem || "Erro ao salvar alterações.";
       toast.error(mensagem);
     }
   };
@@ -155,23 +161,37 @@ const Profile: React.FC = () => {
 
   return (
     <Layout showNavbar>
-      <div className="min-h-screen pt-6 pb-28"> {/* padding maior para FooterNav */}
+      <div className="min-h-screen pt-6 pb-28">
+        {" "}
+        {/* padding maior para FooterNav */}
         <header className="mb-8">
           <div className="flex items-center mb-2">
-            <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")} className="mr-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate("/dashboard")}
+              className="mr-2"
+            >
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <h1 className="text-2xl font-bold text-gray-900">Perfil</h1>
           </div>
-          <p className="text-sm text-gray-600">Gerencie suas informações pessoais e financeiras</p>
+          <p className="text-sm text-gray-600">
+            Gerencie suas informações pessoais e financeiras
+          </p>
         </header>
-
         <Tabs defaultValue="personal" className="mb-8">
           <TabsList className="grid grid-cols-2 w-full bg-eco-green-50 p-1 rounded-lg">
-            <TabsTrigger value="personal" className="data-[state=active]:bg-white">
+            <TabsTrigger
+              value="personal"
+              className="data-[state=active]:bg-white"
+            >
               Informações Pessoais
             </TabsTrigger>
-            <TabsTrigger value="payment" className="data-[state=active]:bg-white">
+            <TabsTrigger
+              value="payment"
+              className="data-[state=active]:bg-white"
+            >
               Métodos de Pagamento
             </TabsTrigger>
           </TabsList>
@@ -179,14 +199,23 @@ const Profile: React.FC = () => {
           <TabsContent value="personal" className="mt-6">
             <div className="glass-card p-5 rounded-xl">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-lg font-semibold text-gray-800">Informações Pessoais</h2>
+                <h2 className="text-lg font-semibold text-gray-800">
+                  Informações Pessoais
+                </h2>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => setIsEditing(!isEditing)}
                   className="flex items-center text-eco-green-600 hover:text-eco-green-700"
                 >
-                  {isEditing ? "Cancelar" : <><Edit className="w-4 h-4 mr-1" />Editar</>}
+                  {isEditing ? (
+                    "Cancelar"
+                  ) : (
+                    <>
+                      <Edit className="w-4 h-4 mr-1" />
+                      Editar
+                    </>
+                  )}
                 </Button>
               </div>
 
@@ -194,7 +223,11 @@ const Profile: React.FC = () => {
                 <div className="flex items-center mb-4">
                   <div className="h-16 w-16 rounded-full overflow-hidden bg-eco-green-100 flex items-center justify-center text-eco-green-600 text-xl font-semibold mr-4">
                     {fotoPerfil ? (
-                      <img src={fotoPerfil} alt="Foto do perfil" className="h-full w-full object-cover" />
+                      <img
+                        src={fotoPerfil}
+                        alt="Foto do perfil"
+                        className="h-full w-full object-cover"
+                      />
                     ) : (
                       userData.name
                         .split(" ")
@@ -204,13 +237,19 @@ const Profile: React.FC = () => {
                     )}
                   </div>
                   <div>
-                    <h3 className="font-medium text-gray-900">{userData.name}</h3>
-                    <p className="text-sm text-gray-500">Membro desde {formatarMesAno(userData.dataRegistro)}</p>
+                    <h3 className="font-medium text-gray-900">
+                      {userData.name}
+                    </h3>
+                    <p className="text-sm text-gray-500">
+                      Membro desde {formatarMesAno(userData.dataRegistro)}
+                    </p>
                   </div>
                 </div>
 
                 <div>
-                  <p className="text-sm font-medium text-gray-500">Código de Cadastro</p>
+                  <p className="text-sm font-medium text-gray-500">
+                    Código de Cadastro
+                  </p>
                   <p className="text-gray-800 font-mono bg-eco-green-50 px-3 py-1 rounded inline-block">
                     {userData.registrationCode}
                   </p>
@@ -219,7 +258,10 @@ const Profile: React.FC = () => {
                 {isEditing ? (
                   <div className="space-y-4">
                     <div>
-                      <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                      <label
+                        htmlFor="name"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                      >
                         Nome
                       </label>
                       <input
@@ -232,7 +274,10 @@ const Profile: React.FC = () => {
                     </div>
 
                     <div>
-                      <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                      <label
+                        htmlFor="email"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                      >
                         Email
                       </label>
                       <input
@@ -245,7 +290,10 @@ const Profile: React.FC = () => {
                     </div>
 
                     <div>
-                      <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+                      <label
+                        htmlFor="phone"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                      >
                         Telefone
                       </label>
                       <input
@@ -265,7 +313,10 @@ const Profile: React.FC = () => {
                     </div>
 
                     <div>
-                      <label htmlFor="imagem" className="block text-sm font-medium text-gray-700 mb-1">
+                      <label
+                        htmlFor="imagem"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                      >
                         Foto de Perfil
                       </label>
                       <input
@@ -284,7 +335,10 @@ const Profile: React.FC = () => {
                       />
                     </div>
 
-                    <Button onClick={handleSaveChanges} className="w-full bg-eco-green-600 hover:bg-eco-green-700">
+                    <Button
+                      onClick={handleSaveChanges}
+                      className="w-full bg-eco-green-600 hover:bg-eco-green-700"
+                    >
                       Salvar Alterações
                     </Button>
                   </div>
@@ -299,7 +353,9 @@ const Profile: React.FC = () => {
                       <p className="text-gray-800">{userData.email}</p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-500">Telefone</p>
+                      <p className="text-sm font-medium text-gray-500">
+                        Telefone
+                      </p>
                       <p className="text-gray-800">{userData.phone}</p>
                     </div>
                   </div>
@@ -310,51 +366,14 @@ const Profile: React.FC = () => {
 
           <TabsContent value="payment" className="mt-6">
             <div className="glass-card p-5 rounded-xl space-y-4">
-              {paymentMethods.length === 0 ? (
-                <p className="text-gray-500">Nenhum método de pagamento cadastrado.</p>
-              ) : (
-                paymentMethods.map((method) => (
-                  <div
-                    key={method.id}
-                    className="flex justify-between items-center border-b border-gray-200 pb-3"
-                  >
-                    <div>
-                      <p className="font-medium">{method.type}</p>
-                      <p className="text-sm text-gray-600">{method.info}</p>
-                      <p className="text-sm text-gray-600">{method.holder}</p>
-                      {method.expiry && <p className="text-sm text-gray-600">Validade: {method.expiry}</p>}
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDeletePaymentMethod(method.id)}
-                      className="text-red-500"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                ))
-              )}
-
-              <Button
-                variant="outline"
-                className="w-full mt-4 flex items-center justify-center"
-                onClick={() => setIsCardDialogOpen(true)}
-              >
-                <PlusCircle className="w-5 h-5 mr-2" /> Adicionar Novo Cartão
-              </Button>
-
-              <Dialog open={isCardDialogOpen} onOpenChange={setIsCardDialogOpen}>
-                <DialogTrigger />
-                <DialogContent>
-                  <CardForm onSubmit={(cardData: CardData) => handleAddCard(cardData)} />
-                </DialogContent>
-              </Dialog>
+              <p className="text-gray-500">
+                No momento, o único método de pagamento disponível é{" "}
+                <strong>PIX</strong>.
+              </p>
             </div>
           </TabsContent>
         </Tabs>
       </div>
-
       <FooterNav /> {/* Rodapé fixo */}
     </Layout>
   );

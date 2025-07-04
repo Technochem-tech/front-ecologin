@@ -52,7 +52,7 @@ const Navbar: React.FC = () => {
         <div className="flex items-center gap-4">
           <span className="text-sm text-gray-600 hidden sm:inline-block">Olá,</span>
           <span className="font-medium text-gray-900 hidden sm:inline-block">
-            {usuarioLogado ? usuarioLogado.nome : "Carregando..."}
+            {usuarioLogado ? usuarioLogado.nome.split(" ")[0] : "Carregando..."}
           </span>
 
           <DropdownMenu>

@@ -94,3 +94,30 @@ export async function cadastrarUsuario(dados: UsuarioCadastro): Promise<void> {
   }
 }
 
+// ENVIAR código de verificação
+export async function enviarCodigoVerificacao(email: string): Promise<void> {
+  try {
+    await api.post("/api/verificacao-email/enviar", email, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+  } catch (error) {
+    tratarErroAPI(error);
+    throw error;
+  }
+}
+
+export async function confirmarCodigoVerificacao(email: string, codigo: string): Promise<boolean> {
+  try {
+    const resposta = await api.post("/api/verificacao-email/confirmar", {
+      email,
+      codigo,
+    });
+    return typeof resposta.data === 'string' && resposta.data.toLowerCase().includes('sucesso');
+  } catch (error) {
+    tratarErroAPI(error);
+    throw error;
+  }
+}
+
