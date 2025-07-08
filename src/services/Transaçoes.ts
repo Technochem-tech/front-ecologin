@@ -7,6 +7,7 @@ export interface Transacao {
   quantidade: number;
   status: string;
   tipo: string;
+  CopiaColaPix: string;
 }
 
 interface RespostaHistorico {

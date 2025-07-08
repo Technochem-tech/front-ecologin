@@ -9,10 +9,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ArrowDownUp, ArrowUp, ArrowDown, Search } from "lucide-react";
+import { ArrowDownUp, ArrowUp, ArrowDown, Search, X } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { ReceberHistoricoTransacao } from "@/services/Transaçoes";
+import QRCode from "react-qr-code";
 
 interface Transaction {
   id: string;
@@ -21,6 +22,7 @@ interface Transaction {
   description: string;
   amount: string;
   status: "completed" | "pending" | "failed";
+  pix?: string;
 }
 
 const mapTipo = (tipo: string): "purchase" | "sale" | "transfer" => {
@@ -39,10 +41,9 @@ const mapStatus = (status: string): "completed" | "pending" | "failed" => {
 
 const Transactions: React.FC = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [tab, setTab] = useState<"all" | "purchase" | "sale" | "transfer">(
-    "all"
-  );
+  const [tab, setTab] = useState<"all" | "purchase" | "sale" | "transfer">("all");
   const [filtroData, setFiltroData] = useState("");
+  const [pixAtivo, setPixAtivo] = useState<string | null>(null);
 
   useEffect(() => {
     const carregarTransacoes = async () => {
@@ -57,10 +58,10 @@ const Transactions: React.FC = () => {
             description: item.descricao,
             amount: `${item.quantidade >= 0 ? "+" : ""}${item.quantidade} tCO₂`,
             status: mapStatus(item.status),
+            pix: item.copiaColaPix || null
           })
         );
 
-        // Filtro por MM/YYYY (ex: 07/2025)
         if (filtroData.match(/^\d{2}\/\d{4}$/)) {
           const [mes, ano] = filtroData.split("/");
           const filtrado = dadosMapeados.filter((t) => {
@@ -88,12 +89,8 @@ const Transactions: React.FC = () => {
     <Layout showNavbar>
       <div className="min-h-screen pt-6 pb-28">
         <header className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">
-            Histórico de Transações
-          </h1>
-          <p className="text-sm text-gray-600">
-            Acompanhe todas as suas movimentações
-          </p>
+          <h1 className="text-2xl font-bold text-gray-900">Histórico de Transações</h1>
+          <p className="text-sm text-gray-600">Acompanhe todas as suas movimentações</p>
         </header>
 
         <div className="mb-6 relative">
@@ -106,15 +103,12 @@ const Transactions: React.FC = () => {
               placeholder="Digite mês e ano (ex: 09/2025)"
               value={filtroData}
               onChange={(e) => {
-                let valor = e.target.value.replace(/\D/g, ""); // Remove tudo que não for número
-                if (valor.length > 6) valor = valor.slice(0, 6); // Limita a 6 dígitos
-
-                // Formata como MM/YYYY
+                let valor = e.target.value.replace(/\D/g, "");
+                if (valor.length > 6) valor = valor.slice(0, 6);
                 let formatado = valor;
                 if (valor.length >= 3) {
                   formatado = valor.slice(0, 2) + "/" + valor.slice(2);
                 }
-
                 setFiltroData(formatado);
               }}
               className="flex-1 py-2 px-2 outline-none text-sm"
@@ -122,11 +116,7 @@ const Transactions: React.FC = () => {
           </div>
         </div>
 
-        <Tabs
-          value={tab}
-          onValueChange={(v) => setTab(v as any)}
-          className="mb-6"
-        >
+        <Tabs value={tab} onValueChange={(v) => setTab(v as any)} className="mb-6">
           <TabsList className="grid grid-cols-4 w-full bg-eco-green-50 p-1 rounded-lg">
             <TabsTrigger value="all">Todas</TabsTrigger>
             <TabsTrigger value="purchase">Compras</TabsTrigger>
@@ -135,18 +125,42 @@ const Transactions: React.FC = () => {
           </TabsList>
 
           <TabsContent value="all" className="mt-4">
-            <TransactionTable transactions={filtrar("all")} />
+            <TransactionTable transactions={filtrar("all")} setPixAtivo={setPixAtivo} />
           </TabsContent>
           <TabsContent value="purchase" className="mt-4">
-            <TransactionTable transactions={filtrar("purchase")} />
+            <TransactionTable transactions={filtrar("purchase")} setPixAtivo={setPixAtivo} />
           </TabsContent>
           <TabsContent value="sale" className="mt-4">
-            <TransactionTable transactions={filtrar("sale")} />
+            <TransactionTable transactions={filtrar("sale")} setPixAtivo={setPixAtivo} />
           </TabsContent>
           <TabsContent value="transfer" className="mt-4">
-            <TransactionTable transactions={filtrar("transfer")} />
+            <TransactionTable transactions={filtrar("transfer")} setPixAtivo={setPixAtivo} />
           </TabsContent>
         </Tabs>
+
+        {pixAtivo && (
+          <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+            <div className="bg-white p-6 rounded-xl shadow-lg relative max-w-sm w-full">
+              <button onClick={() => setPixAtivo(null)} className="absolute top-2 right-2">
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+              <h2 className="text-lg font-bold mb-4 text-center">Pagamento Pendente</h2>
+              <div className="flex justify-center mb-4">
+                <QRCode value={pixAtivo} size={160} />
+              </div>
+              <p className="text-sm text-gray-600 break-all mb-4">{pixAtivo}</p>
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(pixAtivo);
+                  toast.success("PIX copiado!");
+                }}
+                className="w-full bg-eco-green-600 hover:bg-eco-green-700 text-white py-2 rounded"
+              >
+                Copiar PIX
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       <FooterNav />
@@ -154,8 +168,9 @@ const Transactions: React.FC = () => {
   );
 };
 
-const TransactionTable: React.FC<{ transactions: Transaction[] }> = ({
+const TransactionTable: React.FC<{ transactions: Transaction[], setPixAtivo: (v: string) => void }> = ({
   transactions,
+  setPixAtivo
 }) => {
   return (
     <div className="rounded-lg overflow-hidden border border-gray-200">
@@ -177,22 +192,22 @@ const TransactionTable: React.FC<{ transactions: Transaction[] }> = ({
             </TableRow>
           ) : (
             transactions.map((transaction) => (
-              <TableRow key={transaction.id}>
-                <TableCell className="font-medium">
-                  {transaction.date}
-                </TableCell>
+              <TableRow
+                key={transaction.id}
+                className={transaction.status === "pending" ? "cursor-pointer hover:bg-yellow-50" : ""}
+                onClick={() => {
+                  if (transaction.status === "pending" && transaction.pix) {
+                    setPixAtivo(transaction.pix);
+                  }
+                }}
+              >
+                <TableCell className="font-medium">{transaction.date}</TableCell>
                 <TableCell>
                   <div className="flex items-center">
                     <span className="p-1 rounded-full mr-2 bg-gray-100">
-                      {transaction.type === "purchase" && (
-                        <ArrowDown className="h-4 w-4 text-eco-green-500" />
-                      )}
-                      {transaction.type === "sale" && (
-                        <ArrowUp className="h-4 w-4 text-eco-blue-500" />
-                      )}
-                      {transaction.type === "transfer" && (
-                        <ArrowDownUp className="h-4 w-4 text-gray-500" />
-                      )}
+                      {transaction.type === "purchase" && <ArrowDown className="h-4 w-4 text-eco-green-500" />}
+                      {transaction.type === "sale" && <ArrowUp className="h-4 w-4 text-eco-blue-500" />}
+                      {transaction.type === "transfer" && <ArrowDownUp className="h-4 w-4 text-gray-500" />}
                     </span>
                     {transaction.description}
                   </div>

@@ -12,7 +12,7 @@ export async function venderCreditos(token: string, dados: VendaRequest): Promis
         Authorization: `Bearer ${token}`,
       },
     });
-    return response.data; // Exemplo: "Venda realizada com sucesso. Você recebeu R$ 2,50."
+    return response.data; 
   } catch (error) {
     tratarErroAPI(error);
     throw error;

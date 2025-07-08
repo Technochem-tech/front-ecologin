@@ -118,7 +118,7 @@ const SellCredits: React.FC = () => {
             </span>
           </div>
           <div className="text-sm text-gray-500">
-            Valor aproximado: R${" "}
+            Valor aproximado: SCW{" "}
             {(saldoCreditos * VALOR_UNITARIO_CREDITO).toFixed(2)}
           </div>
         </div>
@@ -140,7 +140,7 @@ const SellCredits: React.FC = () => {
           <div className="text-sm text-gray-600">
             <span>Valor estimado: </span>
             <span className="font-medium text-eco-blue-600">
-              R$ {valorEstimado.toFixed(2)}
+              SCW {valorEstimado.toFixed(2)}
             </span>
           </div>
 
@@ -190,7 +190,7 @@ const SellCredits: React.FC = () => {
               </p>
               <p>
                 Você irá receber aproximadamente{" "}
-                <strong>R$ {valorEstimado.toFixed(2)}</strong>.
+                <strong>SCW {valorEstimado.toFixed(2)}</strong>.
               </p>
             </div>
             <DialogFooter className="pt-4">

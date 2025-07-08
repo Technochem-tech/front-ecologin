@@ -125,7 +125,7 @@ const Dashboard: React.FC = () => {
           <BalanceCard
             amount={
               typeof saldo === "number"
-                ? saldo.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
+                ? saldo.toLocaleString("pt-BR", { style: "currency", currency: "SWC" })
                 : "Carregando..."
             }
           />
@@ -187,7 +187,7 @@ const Dashboard: React.FC = () => {
                 key={project.id}
                 title={project.titulo}
                 description={project.descricao}
-                price={`R$ ${project.valor.toFixed(2)}`}
+                price={`SCW ${project.valor.toFixed(2)}`}
                 image={`data:image/jpeg;base64,${project.imgBase64}`}
               />
             ))}

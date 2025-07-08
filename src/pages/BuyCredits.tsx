@@ -7,7 +7,10 @@ import { ArrowLeft, ShoppingCart, Leaf, Info } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { ListarProjetos } from "@/services/projetos";
-import { iniciarCompra, verificarStatusPagamento } from "@/services/ComprarCreditos";
+import {
+  iniciarCompra,
+  verificarStatusPagamento,
+} from "@/services/ComprarCreditos";
 import QRCode from "react-qr-code";
 import FooterNav from "@/components/FooterNav";
 
@@ -56,7 +59,10 @@ const BuyCredits: React.FC = () => {
       if (!token) return;
 
       try {
-        const statusResp = await verificarStatusPagamento(token, compra.pagamentoId);
+        const statusResp = await verificarStatusPagamento(
+          token,
+          compra.pagamentoId
+        );
         const status = statusResp.status.toLowerCase();
 
         if (status === "approved") {
@@ -92,7 +98,11 @@ const BuyCredits: React.FC = () => {
       return;
     }
     if (toneladas < TONELADAS_MINIMAS) {
-      toast.error(`O valor mínimo precisa resultar em pelo menos ${TONELADAS_MINIMAS.toFixed(2)} toneladas de CO₂.`);
+      toast.error(
+        `O valor mínimo precisa resultar em pelo menos ${TONELADAS_MINIMAS.toFixed(
+          2
+        )} toneladas de CO₂.`
+      );
       return;
     }
 
@@ -139,7 +149,10 @@ const BuyCredits: React.FC = () => {
     }
 
     try {
-      const statusResp = await verificarStatusPagamento(token, compra.pagamentoId);
+      const statusResp = await verificarStatusPagamento(
+        token,
+        compra.pagamentoId
+      );
       const status = statusResp.status.toLowerCase();
 
       if (status === "approved") {
@@ -176,17 +189,19 @@ const BuyCredits: React.FC = () => {
           <div className="mb-6 glass-card p-5 rounded-xl">
             <div className="flex items-center mb-4">
               <Leaf className="text-eco-green-500 mr-2 h-5 w-5" />
-              <h2 className="text-lg font-medium">Quanto você quer investir?</h2>
+              <h2 className="text-lg font-medium">
+                Quanto você quer investir?
+              </h2>
             </div>
             <div className="mb-2">
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <span className="text-gray-500">R$</span>
-                </div>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">
+                  SCW
+                </span>
                 <Input
                   type="number"
                   placeholder="0.00"
-                  className="pl-10"
+                  className="pl-12" // mais espaço à esquerda
                   value={amount}
                   onChange={(e) => handleAmountChange(e.target.value)}
                 />
@@ -226,7 +241,7 @@ const BuyCredits: React.FC = () => {
                         {project.descricao}
                       </p>
                       <p className="text-eco-green-600 font-medium mt-2">
-                        R$ {project.valor.toFixed(2)}/tonelada
+                        SCW {project.valor.toFixed(2)}/tonelada
                       </p>
                       <p className="text-xs text-gray-500 mt-1">
                         {project.creditosDisponivel}T disponíveis
@@ -261,19 +276,21 @@ const BuyCredits: React.FC = () => {
             </div>
           </div>
 
-          {/* BOTÃO */}
-          <Button
-            onClick={handleBuy}
-            className="w-full bg-eco-green-600 hover:bg-eco-green-700 py-6"
-            disabled={
-              !amount ||
-              parseFloat(amount) <= 0 ||
-              selectedProject === null ||
-              parseFloat(toneladasAproximadas()) < TONELADAS_MINIMAS
-            }
-          >
-            Finalizar Compra
-          </Button>
+          {/* BOTÃO - só aparece se ainda não iniciou compra */}
+          {!compra && (
+            <Button
+              onClick={handleBuy}
+              className="w-full bg-eco-green-600 hover:bg-eco-green-700 py-6"
+              disabled={
+                !amount ||
+                parseFloat(amount) <= 0 ||
+                selectedProject === null ||
+                parseFloat(toneladasAproximadas()) < TONELADAS_MINIMAS
+              }
+            >
+              Finalizar Compra
+            </Button>
+          )}
 
           {/* QRCODE E BOTÃO STATUS */}
           {compra && (
@@ -288,7 +305,7 @@ const BuyCredits: React.FC = () => {
 
               <div className="w-full text-left space-y-3 text-gray-700 text-sm">
                 <p>
-                  <strong>💰 Valor:</strong> R$ {parseFloat(amount).toFixed(2)}
+                  <strong>💰 Valor:</strong> SCW {parseFloat(amount).toFixed(2)}
                 </p>
                 <p>
                   <strong>🧾 ID do Pagamento:</strong> {compra.pagamentoId}
@@ -301,7 +318,9 @@ const BuyCredits: React.FC = () => {
                     <button
                       onClick={() => {
                         navigator.clipboard.writeText(compra.qrCode);
-                        toast.success("PIX copiado para a área de transferência!");
+                        toast.success(
+                          "PIX copiado para a área de transferência!"
+                        );
                       }}
                       aria-label="Copiar PIX"
                       className="ml-3 flex items-center gap-1 px-3 py-1 bg-eco-green-600 hover:bg-eco-green-700 text-white rounded-md transition"
