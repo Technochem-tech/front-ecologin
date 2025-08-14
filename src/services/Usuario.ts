@@ -114,10 +114,10 @@ export async function confirmarCodigoVerificacao(email: string, codigo: string):
       email,
       codigo,
     });
-    return typeof resposta.data === 'string' && resposta.data.toLowerCase().includes('sucesso');
+
+    return resposta.data?.mensagem?.toLowerCase().includes('sucesso');
   } catch (error) {
     tratarErroAPI(error);
     throw error;
   }
 }
-
