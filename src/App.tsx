@@ -3,6 +3,9 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+
+import PrivateRoute from "@/components/PrivateRoute"; // Importa rota protegida
+
 import EsqueciSenha from "./pages/EsqueciSenha";
 import RedefinirSenha from "./pages/RedefinirSenha";
 import Cadastro from "./pages/Cadastro";
@@ -24,18 +27,62 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-    
+          {/* Rotas públicas */}
           <Route path="/" element={<Index />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/buy-credits" element={<BuyCredits />} />
-          <Route path="/sell-credits" element={<SellCredits />} />
-          <Route path="/transfer" element={<Transfer />} />
-          <Route path="/transactions" element={<Transactions />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="*" element={<NotFound />} />
+          <Route path="/cadastro" element={<Cadastro />} />
           <Route path="/esqueci-senha" element={<EsqueciSenha />} />
           <Route path="/redefinir-senha" element={<RedefinirSenha />} />
-                <Route path="/Cadastro" element={<Cadastro />} />
+          <Route path="*" element={<NotFound />} />
+
+          {/* Rotas protegidas */}
+          <Route
+            path="/dashboard"
+            element={
+              <PrivateRoute>
+                <Dashboard />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/buy-credits"
+            element={
+              <PrivateRoute>
+                <BuyCredits />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/sell-credits"
+            element={
+              <PrivateRoute>
+                <SellCredits />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/transfer"
+            element={
+              <PrivateRoute>
+                <Transfer />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/transactions"
+            element={
+              <PrivateRoute>
+                <Transactions />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <PrivateRoute>
+                <Profile />
+              </PrivateRoute>
+            }
+          />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
