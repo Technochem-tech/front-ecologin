@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Eye, EyeOff, Fingerprint, LogIn } from "lucide-react";
 import Layout from "@/components/Layout";
-
+import logo from "@/assets/logo-soscarbono.png";
 import { login } from "@/services/login";
 import { AxiosError } from "axios";
 
@@ -39,60 +39,12 @@ const Index: React.FC = () => {
 
         <div className="w-full max-w-md space-y-8">
           <div className="text-center">
-            <div className="relative mb-2 inline-block">
-              <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-eco-green-400 to-eco-blue-400 opacity-75 blur-sm animate-pulse"></div>
-              <div className="relative rounded-full bg-white p-4 shadow-sm">
-                <svg
-                  width="40"
-                  height="40"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="mx-auto"
-                >
-                  <path
-                    d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"
-                    stroke="url(#paint0_linear)"
-                    strokeWidth="1.5"
-                  />
-                  <path
-                    d="M8 12.4444L10.5 15L16 9"
-                    stroke="url(#paint1_linear)"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <defs>
-                    <linearGradient
-                      id="paint0_linear"
-                      x1="2"
-                      y1="12"
-                      x2="22"
-                      y2="12"
-                      gradientUnits="userSpaceOnUse"
-                    >
-                      <stop stopColor="#3f9049" />
-                      <stop offset="1" stopColor="#0ca5eb" />
-                    </linearGradient>
-                    <linearGradient
-                      id="paint1_linear"
-                      x1="8"
-                      y1="12"
-                      x2="16"
-                      y2="12"
-                      gradientUnits="userSpaceOnUse"
-                    >
-                      <stop stopColor="#3f9049" />
-                      <stop offset="1" stopColor="#0ca5eb" />
-                    </linearGradient>
-                  </defs>
-                </svg>
-              </div>
+            <div className="relative mb-2 inline-block">  
             </div>
-
-            <h1 className="mt-6 text-3xl font-bold tracking-tight text-gray-900">
+            <img src={logo} alt="Logo SOS Carbono" className="mx-auto mt-7 w-60 h-auto" />
+            {/* <h1 className="mt-6 text-3xl font-bold tracking-tight text-gray-900">
               EcoFinance
-            </h1>
+            </h1> */}
             <p className="mt-2 text-sm text-gray-600">
               Transforme suas finanças. Salve o planeta.
             </p>

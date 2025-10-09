@@ -9,6 +9,7 @@ import { User, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { usuario, UsuarioResposta, buscarImagemUsuario } from "@/services/Usuario";
 import React, { useEffect, useState } from "react";
+import logo from "@/assets/logo-soscarbono.png";
 
 const Navbar: React.FC = () => {
   const navigate = useNavigate();
@@ -44,9 +45,14 @@ const Navbar: React.FC = () => {
     <nav className="w-full py-3 px-4 sm:px-6 lg:px-8 bg-white/80 backdrop-blur-sm shadow-sm mb-6">
       <div className="max-w-screen-xl mx-auto flex justify-between items-center">
         <div className="flex items-center">
-          <h2 className="text-xl font-semibold text-eco-green-700">
+          {/* <h2 className="text-xl font-semibold text-eco-green-700">
             EcoCredits
-          </h2>
+          </h2> */}
+          <img
+            src={logo}
+            alt="Logo SOS Carbono"
+            className="w-40 h-auto sm:w-48" // 👈 ajusta o tamanho conforme a tela
+          />
         </div>
 
         <div className="flex items-center gap-4">

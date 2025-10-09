@@ -196,7 +196,7 @@ const BuyCredits: React.FC = () => {
             <div className="mb-2">
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">
-                  SCW
+                  SCB
                 </span>
                 <Input
                   type="number"
@@ -241,7 +241,7 @@ const BuyCredits: React.FC = () => {
                         {project.descricao}
                       </p>
                       <p className="text-eco-green-600 font-medium mt-2">
-                        SCW {project.valor.toFixed(2)}/tonelada
+                        SCB {project.valor.toFixed(2)}/tonelada
                       </p>
                       <p className="text-xs text-gray-500 mt-1">
                         {project.creditosDisponivel}T disponíveis
@@ -305,7 +305,7 @@ const BuyCredits: React.FC = () => {
 
               <div className="w-full text-left space-y-3 text-gray-700 text-sm">
                 <p>
-                  <strong>💰 Valor:</strong> SCW {parseFloat(amount).toFixed(2)}
+                  <strong>💰 Valor:</strong> SCB {parseFloat(amount).toFixed(2)}
                 </p>
                 <p>
                   <strong>🧾 ID do Pagamento:</strong> {compra.pagamentoId}
