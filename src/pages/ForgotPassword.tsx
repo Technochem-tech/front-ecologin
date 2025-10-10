@@ -2,11 +2,11 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import Layout from "@/components/Layout";
-import { solicitarRedefinicao } from "@/services/redefinicaoSenha";
+import { solicitarRedefinicao } from "@/services/resetPassword";
 import { toast } from "sonner";
 import { AxiosError } from "axios";
 
-export default function EsqueciSenha() {
+export default function ForgotPassword() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -50,7 +50,9 @@ export default function EsqueciSenha() {
           </button>
 
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900">Esqueci minha senha</h1>
+            <h1 className="text-2xl font-bold text-gray-900">
+              Esqueci minha senha
+            </h1>
             <p className="text-sm text-gray-600 mt-1">
               Informe seu e-mail para receber o link de redefinição
             </p>

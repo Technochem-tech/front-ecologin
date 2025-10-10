@@ -7,13 +7,19 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { User, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { usuario, UsuarioResposta, buscarImagemUsuario } from "@/services/Usuario";
+import {
+  usuario,
+  UsuarioResposta,
+  buscarImagemUsuario,
+} from "@/services/users";
 import React, { useEffect, useState } from "react";
 import logo from "@/assets/logo-soscarbono.png";
 
 const Navbar: React.FC = () => {
   const navigate = useNavigate();
-  const [usuarioLogado, setUsuarioLogado] = useState<UsuarioResposta | null>(null);
+  const [usuarioLogado, setUsuarioLogado] = useState<UsuarioResposta | null>(
+    null
+  );
   const [fotoPerfil, setFotoPerfil] = useState<string | null>(null);
 
   // Buscar usuário logado e imagem de perfil
@@ -56,7 +62,9 @@ const Navbar: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-4">
-          <span className="text-sm text-gray-600 hidden sm:inline-block">Olá,</span>
+          <span className="text-sm text-gray-600 hidden sm:inline-block">
+            Olá,
+          </span>
           <span className="font-medium text-gray-900 hidden sm:inline-block">
             {usuarioLogado ? usuarioLogado.nome.split(" ")[0] : "Carregando..."}
           </span>
@@ -64,10 +72,7 @@ const Navbar: React.FC = () => {
           <DropdownMenu>
             <DropdownMenuTrigger className="outline-none">
               <Avatar className="h-10 w-10 border-2 border-white shadow-sm">
-                <AvatarImage
-                  src={fotoPerfil || undefined}
-                  alt="User profile"
-                />
+                <AvatarImage src={fotoPerfil || undefined} alt="User profile" />
                 <AvatarFallback className="bg-eco-green-100 text-eco-green-700">
                   {usuarioLogado?.nome
                     ?.split(" ")

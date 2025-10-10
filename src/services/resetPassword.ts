@@ -1,6 +1,6 @@
 import { strict } from "assert";
 import api from "./api";
-import { tratarErroAPI } from "@/utils/tratarErroAPI";
+import { tratarErroAPI } from "@/utils/handleApiError";
 import { promise, string } from "zod";
 import { error } from "console";
 
@@ -25,14 +25,17 @@ export async function validarToken(token: string): Promise<boolean> {
 }
 
 // 3. Atualizar senha
-export async function atualizarSenha(token:string, novaSenha:string):Promise<void> {
-    try{
-        await api.post("/api/RedefinicaoSenha/atualizar-senha",{
-            token,
-            novaSenha,
-        });
-    } catch (error){
-        tratarErroAPI (error);
-        throw error;
-    }
+export async function atualizarSenha(
+  token: string,
+  novaSenha: string
+): Promise<void> {
+  try {
+    await api.post("/api/RedefinicaoSenha/atualizar-senha", {
+      token,
+      novaSenha,
+    });
+  } catch (error) {
+    tratarErroAPI(error);
+    throw error;
+  }
 }

@@ -15,7 +15,7 @@ import {
   atualizarTelefone,
   buscarImagemUsuario,
   AddOuAtualizarImgUsuario,
-} from "@/services/Usuario";
+} from "@/services/users";
 
 type PaymentMethod = {
   id: string;

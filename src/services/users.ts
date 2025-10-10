@@ -1,5 +1,5 @@
 import api from "./api";
-import { tratarErroAPI } from "@/utils/tratarErroAPI"; 
+import { tratarErroAPI } from "@/utils/handleApiError";
 
 export type UsuarioResposta = {
   id: number;
@@ -8,7 +8,7 @@ export type UsuarioResposta = {
   empresa: string;
   cnpj: string;
   telefone: string;
-  dataCadastro : string;
+  dataCadastro: string;
 };
 
 // Buscar usuário logado
@@ -25,7 +25,10 @@ export async function usuario(token: string): Promise<UsuarioResposta> {
 }
 
 // Atualizar telefone
-export async function atualizarTelefone(token: string, telefone: string): Promise<void> {
+export async function atualizarTelefone(
+  token: string,
+  telefone: string
+): Promise<void> {
   try {
     await api.put(
       "/api/Usuario/EditarTelefone",
@@ -59,10 +62,13 @@ export async function buscarImagemUsuario(token: string): Promise<string> {
   }
 }
 // Atualizar ou Adicionar foto de usuario.
-export async function AddOuAtualizarImgUsuario(token: string, imagem: File): Promise<void> {
+export async function AddOuAtualizarImgUsuario(
+  token: string,
+  imagem: File
+): Promise<void> {
   try {
     const formData = new FormData();
-    formData.append("imagem", imagem); 
+    formData.append("imagem", imagem);
 
     await api.put("/api/Usuario/SalvarOuAtualizarImagem", formData, {
       headers: {
@@ -108,14 +114,17 @@ export async function enviarCodigoVerificacao(email: string): Promise<void> {
   }
 }
 
-export async function confirmarCodigoVerificacao(email: string, codigo: string): Promise<boolean> {
+export async function confirmarCodigoVerificacao(
+  email: string,
+  codigo: string
+): Promise<boolean> {
   try {
     const resposta = await api.post("/api/verificacao-email/confirmar", {
       email,
       codigo,
     });
 
-    return resposta.data?.mensagem?.toLowerCase().includes('sucesso');
+    return resposta.data?.mensagem?.toLowerCase().includes("sucesso");
   } catch (error) {
     tratarErroAPI(error);
     throw error;

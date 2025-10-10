@@ -6,9 +6,9 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import PrivateRoute from "@/components/PrivateRoute"; // Importa rota protegida
 
-import EsqueciSenha from "./pages/EsqueciSenha";
-import RedefinirSenha from "./pages/RedefinirSenha";
-import Cadastro from "./pages/Cadastro";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
+import Registration from "./pages/Registration";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import BuyCredits from "./pages/BuyCredits";
@@ -29,9 +29,10 @@ const App = () => (
         <Routes>
           {/* Rotas públicas */}
           <Route path="/" element={<Index />} />
-          <Route path="/cadastro" element={<Cadastro />} />
-          <Route path="/esqueci-senha" element={<EsqueciSenha />} />
-          <Route path="/redefinir-senha" element={<RedefinirSenha />} />
+          <Route path="/registration" element={<Registration />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+
           <Route path="*" element={<NotFound />} />
 
           {/* Rotas protegidas */}

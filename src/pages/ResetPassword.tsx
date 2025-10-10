@@ -2,10 +2,10 @@ import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import Layout from "@/components/Layout";
-import { validarToken, atualizarSenha } from "@/services/redefinicaoSenha";
+import { validarToken, atualizarSenha } from "@/services/resetPassword";
 import { toast } from "sonner";
 
-export default function RedefinirSenha() {
+export default function ResetPassword() {
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token") ?? "";
   const navigate = useNavigate();
@@ -56,7 +56,9 @@ export default function RedefinirSenha() {
     return (
       <Layout>
         <div className="min-h-screen flex items-center justify-center">
-          <p className="text-red-600 font-semibold">Token inválido ou expirado.</p>
+          <p className="text-red-600 font-semibold">
+            Token inválido ou expirado.
+          </p>
         </div>
       </Layout>
     );
@@ -83,14 +85,19 @@ export default function RedefinirSenha() {
 
         <div className="w-full max-w-md space-y-6">
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900">Redefinir Senha</h1>
+            <h1 className="text-2xl font-bold text-gray-900">
+              Redefinir Senha
+            </h1>
             <p className="text-sm text-gray-600 mt-1">Digite sua nova senha</p>
           </div>
 
           <div className="glass-card rounded-2xl shadow-lg px-6 py-8">
             <div className="space-y-4">
               <div>
-                <label htmlFor="novaSenha" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="novaSenha"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   Nova Senha
                 </label>
                 <div className="relative">
@@ -108,7 +115,9 @@ export default function RedefinirSenha() {
                     type="button"
                     className="absolute inset-y-0 right-0 pr-3 flex items-center"
                     onClick={() => setMostrarSenha(!mostrarSenha)}
-                    aria-label={mostrarSenha ? "Ocultar senha" : "Mostrar senha"}
+                    aria-label={
+                      mostrarSenha ? "Ocultar senha" : "Mostrar senha"
+                    }
                   >
                     {mostrarSenha ? (
                       <EyeOff className="h-5 w-5 text-gray-400" />
@@ -120,7 +129,10 @@ export default function RedefinirSenha() {
               </div>
 
               <div>
-                <label htmlFor="confirmarSenha" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="confirmarSenha"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   Confirmar Senha
                 </label>
                 <input
@@ -143,7 +155,9 @@ export default function RedefinirSenha() {
               </button>
 
               {erroMensagem && (
-                <div className="mt-2 text-xs text-center text-red-600">{erroMensagem}</div>
+                <div className="mt-2 text-xs text-center text-red-600">
+                  {erroMensagem}
+                </div>
               )}
             </div>
           </div>

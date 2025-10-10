@@ -1,18 +1,21 @@
 import api from "./api";
-import { tratarErroAPI } from "@/utils/tratarErroAPI";
+import { tratarErroAPI } from "@/utils/handleApiError";
 
 interface VendaRequest {
   quantidadeCreditos: number;
 }
 
-export async function venderCreditos(token: string, dados: VendaRequest): Promise<string> {
+export async function venderCreditos(
+  token: string,
+  dados: VendaRequest
+): Promise<string> {
   try {
     const response = await api.post<string>("/api/VendaCredito/vender", dados, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     });
-    return response.data; 
+    return response.data;
   } catch (error) {
     tratarErroAPI(error);
     throw error;

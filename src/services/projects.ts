@@ -1,4 +1,4 @@
-import { tratarErroAPI } from "@/utils/tratarErroAPI";
+import { tratarErroAPI } from "@/utils/handleApiError";
 import api from "./api";
 
 interface Projeto {
@@ -8,7 +8,6 @@ interface Projeto {
   descricao: string;
   imgBase64: string;
   creditosDisponivel: number;
-
 }
 
 export async function ListarProjetos(token: string): Promise<Projeto[]> {

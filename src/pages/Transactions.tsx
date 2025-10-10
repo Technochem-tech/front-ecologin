@@ -12,7 +12,7 @@ import {
 import { ArrowDownUp, ArrowUp, ArrowDown, Search, X } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { ReceberHistoricoTransacao } from "@/services/Transaçoes";
+import { ReceberHistoricoTransacao } from "@/services/transactions";
 import QRCode from "react-qr-code";
 
 interface Transaction {

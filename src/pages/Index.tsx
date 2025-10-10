@@ -146,7 +146,7 @@ const Index: React.FC = () => {
             <div className="mt-6 flex items-center justify-between">
               <div className="text-sm">
                 <Link
-                  to="esqueci-senha"
+                  to="forgot-password"
                   className="font-medium text-eco-green-600 hover:text-eco-green-500"
                 >
                   Esqueci minha senha
@@ -154,7 +154,7 @@ const Index: React.FC = () => {
               </div>
               <div className="text-sm">
                 <Link
-                  to="/Cadastro"
+                  to="/registration"
                   className="font-medium text-eco-green-600 hover:text-eco-green-500"
                 >
                   Criar Conta

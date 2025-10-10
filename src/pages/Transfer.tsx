@@ -17,9 +17,9 @@ import { toast } from "sonner";
 import {
   VerificarDestinatario,
   ConfirmarTransferenciaCredito,
-} from "@/services/tranferencia";
+} from "@/services/transfer";
 
-import { getSaldo, getSaldoCreditos } from "@/services/getSaldo";
+import { getSaldo, getSaldoCreditos } from "@/services/getBalance";
 import FooterNav from "@/components/FooterNav"; // <== Rodapé adicionado aqui
 
 interface Destinatario {
@@ -320,7 +320,6 @@ const Transfer: React.FC = () => {
           </DialogContent>
         </Dialog>
       </div>
-
       <FooterNav /> {/* <- Rodapé fixo aqui */}
     </Layout>
   );

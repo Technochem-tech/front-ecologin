@@ -1,40 +1,41 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, ArrowLeft } from 'lucide-react';
-import { IMaskInput } from 'react-imask';
-import Layout from '@/components/Layout';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Eye, EyeOff, ArrowLeft } from "lucide-react";
+import { IMaskInput } from "react-imask";
+import Layout from "@/components/Layout";
 import {
   cadastrarUsuario,
   enviarCodigoVerificacao,
   confirmarCodigoVerificacao,
   UsuarioCadastro,
-} from '@/services/Usuario';
-import { AxiosError } from 'axios';
-import { toast } from 'sonner';
+} from "@/services/users";
+import { AxiosError } from "axios";
+import { toast } from "sonner";
 
 interface RespostaErro {
   mensagem?: string;
 }
 
-const limparMascara = (valor: string) => valor.replace(/\D/g, '');
+const limparMascara = (valor: string) => valor.replace(/\D/g, "");
 
-const Cadastro: React.FC = () => {
+const Registration: React.FC = () => {
   const navigate = useNavigate();
-  const [etapa, setEtapa] = useState<'email' | 'codigo' | 'cadastro'>('email');
+  const [etapa, setEtapa] = useState<"email" | "codigo" | "cadastro">("email");
 
-  const [email, setEmail] = useState('');
-  const [codigo, setCodigo] = useState('');
-  const [nome, setNome] = useState('');
-  const [senha, setSenha] = useState('');
-  const [confirmaSenha, setConfirmaSenha] = useState('');
-  const [empresa, setEmpresa] = useState('');
-  const [cnpj, setCnpj] = useState('');
-  const [telefone, setTelefone] = useState('');
+  const [email, setEmail] = useState("");
+  const [codigo, setCodigo] = useState("");
+  const [nome, setNome] = useState("");
+  const [senha, setSenha] = useState("");
+  const [confirmaSenha, setConfirmaSenha] = useState("");
+  const [empresa, setEmpresa] = useState("");
+  const [cnpj, setCnpj] = useState("");
+  const [telefone, setTelefone] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [erroMensagem, setErroMensagem] = useState<string | null>(null);
   const [loading, setLoading] = useState(false); // 👈 novo estado para loading
 
-  const validarEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const validarEmail = (email: string) =>
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const validarSenha = (senha: string) =>
     /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(senha);
 
@@ -43,21 +44,21 @@ const Cadastro: React.FC = () => {
     setErroMensagem(null);
 
     if (!validarEmail(email)) {
-      setErroMensagem('Por favor, insira um e-mail válido.');
+      setErroMensagem("Por favor, insira um e-mail válido.");
       return;
     }
 
     try {
       setLoading(true); // 👈 inicia loading
       await enviarCodigoVerificacao(email);
-      toast.success('Código de verificação enviado para o seu e-mail!');
-      setEtapa('codigo');
+      toast.success("Código de verificação enviado para o seu e-mail!");
+      setEtapa("codigo");
     } catch (error) {
       const err = error as AxiosError<RespostaErro>;
       const msg =
         err.response?.data?.mensagem ||
-        (typeof err.response?.data === 'string' ? err.response.data : '') ||
-        'Erro ao enviar código.';
+        (typeof err.response?.data === "string" ? err.response.data : "") ||
+        "Erro ao enviar código.";
       setErroMensagem(msg);
     } finally {
       setLoading(false); // 👈 finaliza loading
@@ -69,24 +70,24 @@ const Cadastro: React.FC = () => {
     setErroMensagem(null);
 
     if (codigo.trim().length === 0) {
-      setErroMensagem('Informe o código de verificação.');
+      setErroMensagem("Informe o código de verificação.");
       return;
     }
 
     try {
       const confirmado = await confirmarCodigoVerificacao(email, codigo.trim());
       if (confirmado) {
-        toast.success('Código confirmado! Agora complete seu cadastro.');
-        setEtapa('cadastro');
+        toast.success("Código confirmado! Agora complete seu cadastro.");
+        setEtapa("cadastro");
       } else {
-        setErroMensagem('Código inválido. Tente novamente.');
+        setErroMensagem("Código inválido. Tente novamente.");
       }
     } catch (error) {
       const err = error as AxiosError<RespostaErro>;
       const msg =
         err.response?.data?.mensagem ||
-        (typeof err.response?.data === 'string' ? err.response.data : '') ||
-        'Erro ao confirmar código.';
+        (typeof err.response?.data === "string" ? err.response.data : "") ||
+        "Erro ao confirmar código.";
       setErroMensagem(msg);
     }
   };
@@ -97,23 +98,23 @@ const Cadastro: React.FC = () => {
 
     if (!validarSenha(senha)) {
       setErroMensagem(
-        'A senha deve conter ao menos 8 caracteres, 1 letra maiúscula, 1 número e 1 caractere especial.'
+        "A senha deve conter ao menos 8 caracteres, 1 letra maiúscula, 1 número e 1 caractere especial."
       );
       return;
     }
 
     if (senha !== confirmaSenha) {
-      setErroMensagem('As senhas não coincidem.');
+      setErroMensagem("As senhas não coincidem.");
       return;
     }
 
     if (limparMascara(cnpj).length !== 14) {
-      setErroMensagem('Preencha o CNPJ completo.');
+      setErroMensagem("Preencha o CNPJ completo.");
       return;
     }
 
     if (limparMascara(telefone).length !== 11) {
-      setErroMensagem('Preencha o telefone completo.');
+      setErroMensagem("Preencha o telefone completo.");
       return;
     }
 
@@ -128,29 +129,33 @@ const Cadastro: React.FC = () => {
 
     try {
       await cadastrarUsuario(dados);
-      toast.success('Conta criada com sucesso! ✅');
-      setTimeout(() => navigate('/'), 3000);
+      toast.success("Conta criada com sucesso! ✅");
+      setTimeout(() => navigate("/"), 3000);
     } catch (error) {
       const err = error as AxiosError<RespostaErro>;
       const msg =
         err.response?.data?.mensagem?.toLowerCase() ||
-        (typeof err.response?.data === 'string' ? err.response.data.toLowerCase() : '') ||
-        '';
+        (typeof err.response?.data === "string"
+          ? err.response.data.toLowerCase()
+          : "") ||
+        "";
 
       if (err.response?.status === 400) {
-        if (msg.includes('email')) {
-          setErroMensagem('Este e-mail já está cadastrado.');
-        } else if (msg.includes('cnpj')) {
-          setErroMensagem('Este CNPJ já está cadastrado.');
-        } else if (msg.includes('telefone')) {
-          setErroMensagem('Este telefone já está cadastrado.');
-        } else if (msg.includes('obrigatório')) {
-          setErroMensagem('Todos os campos são obrigatórios.');
+        if (msg.includes("email")) {
+          setErroMensagem("Este e-mail já está cadastrado.");
+        } else if (msg.includes("cnpj")) {
+          setErroMensagem("Este CNPJ já está cadastrado.");
+        } else if (msg.includes("telefone")) {
+          setErroMensagem("Este telefone já está cadastrado.");
+        } else if (msg.includes("obrigatório")) {
+          setErroMensagem("Todos os campos são obrigatórios.");
         } else {
-          setErroMensagem(msg || 'Erro ao cadastrar usuário. Verifique os dados.');
+          setErroMensagem(
+            msg || "Erro ao cadastrar usuário. Verifique os dados."
+          );
         }
       } else {
-        setErroMensagem(msg || 'Erro ao cadastrar usuário. Tente novamente.');
+        setErroMensagem(msg || "Erro ao cadastrar usuário. Tente novamente.");
       }
     }
   };
@@ -169,19 +174,27 @@ const Cadastro: React.FC = () => {
 
         <div className="w-full max-w-md space-y-8">
           <div className="text-center">
-            <h1 className="text-3xl font-bold tracking-tight text-gray-900">Criar Conta</h1>
+            <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+              Criar Conta
+            </h1>
             <p className="mt-2 text-sm text-gray-600">
-              {etapa === 'email' && 'Informe seu e-mail para receber um código de verificação.'}
-              {etapa === 'codigo' && 'Informe o código que enviamos para seu e-mail.'}
-              {etapa === 'cadastro' && 'Complete seu cadastro com os dados abaixo.'}
+              {etapa === "email" &&
+                "Informe seu e-mail para receber um código de verificação."}
+              {etapa === "codigo" &&
+                "Informe o código que enviamos para seu e-mail."}
+              {etapa === "cadastro" &&
+                "Complete seu cadastro com os dados abaixo."}
             </p>
           </div>
 
           <div className="glass-card rounded-2xl shadow-lg px-6 py-8 mt-4">
-            {etapa === 'email' && (
+            {etapa === "email" && (
               <form onSubmit={handleEnviarCodigo} className="space-y-6">
                 <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                  <label
+                    htmlFor="email"
+                    className="block text-sm font-medium text-gray-700"
+                  >
                     E-mail
                   </label>
                   <input
@@ -200,15 +213,18 @@ const Cadastro: React.FC = () => {
                   className="eco-button w-full py-3"
                   disabled={loading}
                 >
-                  {loading ? 'Enviando...' : 'Enviar Código'}
+                  {loading ? "Enviando..." : "Enviar Código"}
                 </button>
               </form>
             )}
 
-            {etapa === 'codigo' && (
+            {etapa === "codigo" && (
               <form onSubmit={handleConfirmarCodigo} className="space-y-6">
                 <div>
-                  <label htmlFor="codigo" className="block text-sm font-medium text-gray-700">
+                  <label
+                    htmlFor="codigo"
+                    className="block text-sm font-medium text-gray-700"
+                  >
                     Código de Verificação
                   </label>
                   <input
@@ -227,7 +243,7 @@ const Cadastro: React.FC = () => {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setEtapa('email')}
+                  onClick={() => setEtapa("email")}
                   className="mt-2 text-sm text-gray-600 underline"
                 >
                   Alterar e-mail
@@ -235,10 +251,13 @@ const Cadastro: React.FC = () => {
               </form>
             )}
 
-            {etapa === 'cadastro' && (
+            {etapa === "cadastro" && (
               <form className="space-y-6" onSubmit={handleCadastro}>
                 <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                  <label
+                    htmlFor="email"
+                    className="block text-sm font-medium text-gray-700"
+                  >
                     E-mail
                   </label>
                   <input
@@ -252,7 +271,10 @@ const Cadastro: React.FC = () => {
                 </div>
 
                 <div>
-                  <label htmlFor="nome" className="block text-sm font-medium text-gray-700">
+                  <label
+                    htmlFor="nome"
+                    className="block text-sm font-medium text-gray-700"
+                  >
                     Nome completo
                   </label>
                   <input
@@ -268,14 +290,17 @@ const Cadastro: React.FC = () => {
                 </div>
 
                 <div>
-                  <label htmlFor="senha" className="block text-sm font-medium text-gray-700">
+                  <label
+                    htmlFor="senha"
+                    className="block text-sm font-medium text-gray-700"
+                  >
                     Senha
                   </label>
                   <div className="relative">
                     <input
                       id="senha"
                       name="senha"
-                      type={showPassword ? 'text' : 'password'}
+                      type={showPassword ? "text" : "password"}
                       required
                       value={senha}
                       onChange={(e) => setSenha(e.target.value)}
@@ -298,13 +323,16 @@ const Cadastro: React.FC = () => {
                 </div>
 
                 <div>
-                  <label htmlFor="confirmaSenha" className="block text-sm font-medium text-gray-700">
+                  <label
+                    htmlFor="confirmaSenha"
+                    className="block text-sm font-medium text-gray-700"
+                  >
                     Confirmar Senha
                   </label>
                   <input
                     id="confirmaSenha"
                     name="confirmaSenha"
-                    type={showPassword ? 'text' : 'password'}
+                    type={showPassword ? "text" : "password"}
                     required
                     value={confirmaSenha}
                     onChange={(e) => setConfirmaSenha(e.target.value)}
@@ -314,7 +342,10 @@ const Cadastro: React.FC = () => {
                 </div>
 
                 <div>
-                  <label htmlFor="empresa" className="block text-sm font-medium text-gray-700">
+                  <label
+                    htmlFor="empresa"
+                    className="block text-sm font-medium text-gray-700"
+                  >
                     Empresa
                   </label>
                   <input
@@ -330,7 +361,10 @@ const Cadastro: React.FC = () => {
                 </div>
 
                 <div>
-                  <label htmlFor="cnpj" className="block text-sm font-medium text-gray-700">
+                  <label
+                    htmlFor="cnpj"
+                    className="block text-sm font-medium text-gray-700"
+                  >
                     CNPJ
                   </label>
                   <IMaskInput
@@ -346,7 +380,10 @@ const Cadastro: React.FC = () => {
                 </div>
 
                 <div>
-                  <label htmlFor="telefone" className="block text-sm font-medium text-gray-700">
+                  <label
+                    htmlFor="telefone"
+                    className="block text-sm font-medium text-gray-700"
+                  >
                     Telefone
                   </label>
                   <IMaskInput
@@ -368,7 +405,9 @@ const Cadastro: React.FC = () => {
             )}
 
             {erroMensagem && (
-              <div className="mt-2 text-xs text-center text-red-600">{erroMensagem}</div>
+              <div className="mt-2 text-xs text-center text-red-600">
+                {erroMensagem}
+              </div>
             )}
           </div>
         </div>
@@ -377,4 +416,4 @@ const Cadastro: React.FC = () => {
   );
 };
 
-export default Cadastro;
+export default Registration;

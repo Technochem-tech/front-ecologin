@@ -1,6 +1,5 @@
-import api from "./api"; 
-import { tratarErroAPI } from "@/utils/tratarErroAPI";
-
+import api from "./api";
+import { tratarErroAPI } from "@/utils/handleApiError";
 
 interface RespostaApi {
   id: number;
@@ -9,14 +8,16 @@ interface RespostaApi {
   cnpj: string;
 }
 
-
-export async function VerificarDestinatario(token: string, emailOuCnpj: string): Promise<RespostaApi> {
+export async function VerificarDestinatario(
+  token: string,
+  emailOuCnpj: string
+): Promise<RespostaApi> {
   try {
     const response = await api.get<RespostaApi>(
       "/api/TransferirCredito/verificar-destinatario",
       {
         params: { emailOuCnpj },
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       }
     );
     return response.data;
@@ -32,7 +33,10 @@ interface ConfirmarTransferenciaPayload {
   descricao: string;
 }
 
-export async function ConfirmarTransferenciaCredito(token: string, payload: ConfirmarTransferenciaPayload): Promise<void> {
+export async function ConfirmarTransferenciaCredito(
+  token: string,
+  payload: ConfirmarTransferenciaPayload
+): Promise<void> {
   try {
     await api.post(
       "/api/TransferirCredito/confirmarTransferenciaCredito",

@@ -6,11 +6,11 @@ import { Input } from "@/components/ui/input";
 import { ArrowLeft, ShoppingCart, Leaf, Info } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { ListarProjetos } from "@/services/projetos";
+import { ListarProjetos } from "@/services/projects";
 import {
   iniciarCompra,
   verificarStatusPagamento,
-} from "@/services/ComprarCreditos";
+} from "@/services/purchaseCredits";
 import QRCode from "react-qr-code";
 import FooterNav from "@/components/FooterNav";
 

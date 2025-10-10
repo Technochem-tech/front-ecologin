@@ -5,8 +5,8 @@ import { Input } from "@/components/ui/input";
 import { ArrowLeft, AlertCircle, Leaf } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { getSaldoCreditos } from "@/services/getSaldo";
-import { venderCreditos } from "@/services/VenderCreditos";
+import { getSaldoCreditos } from "@/services/getBalance";
+import { venderCreditos } from "@/services/sellCredits";
 import {
   Dialog,
   DialogContent,
