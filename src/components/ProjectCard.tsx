@@ -37,12 +37,12 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
           <span className="text-sm font-semibold text-eco-green-700">
             {price}/t
           </span>
-          <button
+          {/* <button
             onClick={() => navigate(`/projetos/${id}`)}
             className="text-xs px-3 py-1 rounded-full bg-eco-green-100 text-eco-green-700 font-medium"
           >
             Ver Mais
-          </button>
+          </button> */}
         </div>
       </div>
     </div>
