@@ -5,9 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PlusCircle, Edit, Trash2, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import CardForm from "@/components/CardForm";
-import FooterNav from "@/components/FooterNav"; // Importa rodapé fixo
+import FooterNav from "@/components/FooterNav";
 
 import {
   UsuarioResposta,
@@ -34,10 +32,7 @@ type CardData = {
 const Profile: React.FC = () => {
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
-  const [isCardDialogOpen, setIsCardDialogOpen] = useState(false);
-  const [usuarioLogado, setUsuarioLogado] = useState<UsuarioResposta | null>(
-    null
-  );
+  const [usuarioLogado, setUsuarioLogado] = useState<UsuarioResposta | null>(null);
   const [fotoPerfil, setFotoPerfil] = useState<string | null>(null);
   const [imagemSelecionada, setImagemSelecionada] = useState<File | null>(null);
   const [telefoneOriginal, setTelefoneOriginal] = useState<string>("");
@@ -50,6 +45,8 @@ const Profile: React.FC = () => {
     dataRegistro: "",
   });
 
+  const [userDataOriginal, setUserDataOriginal] = useState(userData);
+  const [fotoPerfilOriginal, setFotoPerfilOriginal] = useState<string | null>(null);
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
 
   function formatarMesAno(data: string) {
@@ -78,6 +75,7 @@ const Profile: React.FC = () => {
 
         const imagemBase64 = await buscarImagemUsuario(token);
         setFotoPerfil(imagemBase64);
+        setFotoPerfilOriginal(imagemBase64); // salva original
       } catch (error) {
         console.warn("Não foi possível carregar os dados.");
       }
@@ -87,17 +85,16 @@ const Profile: React.FC = () => {
 
   useEffect(() => {
     if (usuarioLogado) {
-      const codigoFormatado = `ECO-010${String(usuarioLogado.id).padStart(
-        6,
-        "0"
-      )}`;
-      setUserData({
+      const codigoFormatado = `ECO-010${String(usuarioLogado.id).padStart(6, "0")}`;
+      const novoUserData = {
         name: usuarioLogado.nome,
         email: usuarioLogado.email,
         phone: formatarTelefone(usuarioLogado.telefone),
         registrationCode: codigoFormatado,
         dataRegistro: usuarioLogado.dataCadastro,
-      });
+      };
+      setUserData(novoUserData);
+      setUserDataOriginal(novoUserData); // salva original
     }
   }, [usuarioLogado]);
 
@@ -112,7 +109,6 @@ const Profile: React.FC = () => {
     const telefoneFoiAlterado = rawPhone !== telefoneOriginal;
 
     try {
-      // Atualiza telefone se estiver editando e houve alteração
       if (isEditing && telefoneFoiAlterado) {
         if (rawPhone.length !== 11) {
           toast.error("Número de telefone inválido.");
@@ -121,25 +117,28 @@ const Profile: React.FC = () => {
         await atualizarTelefone(token, rawPhone);
       }
 
-      // Atualiza imagem se nova foi selecionada
       if (imagemSelecionada) {
         await AddOuAtualizarImgUsuario(token, imagemSelecionada);
         const novaImagem = await buscarImagemUsuario(token);
         setFotoPerfil(novaImagem);
+        setFotoPerfilOriginal(novaImagem); // atualiza original após salvar
       }
 
+      setUserDataOriginal(userData); // atualiza original após salvar
       setIsEditing(false);
+      setImagemSelecionada(null);
       toast.success("Dados atualizados com sucesso!");
     } catch (error: any) {
-      const mensagem =
-        error?.response?.data?.mensagem || "Erro ao salvar alterações.";
+      const mensagem = error?.response?.data?.mensagem || "Erro ao salvar alterações.";
       toast.error(mensagem);
     }
   };
 
-  const handleDeletePaymentMethod = (id: string) => {
-    setPaymentMethods((prev) => prev.filter((method) => method.id !== id));
-    toast.success("Método de pagamento removido com sucesso!");
+  const handleCancelEdit = () => {
+    setUserData(userDataOriginal); // reseta campos
+    setFotoPerfil(fotoPerfilOriginal); // reseta foto
+    setImagemSelecionada(null);
+    setIsEditing(false);
   };
 
   const handleAddCard = (cardData: CardData) => {
@@ -155,15 +154,12 @@ const Profile: React.FC = () => {
     };
 
     setPaymentMethods([...paymentMethods, newMethod]);
-    setIsCardDialogOpen(false);
     toast.success("Novo cartão adicionado com sucesso!");
   };
 
   return (
     <Layout showNavbar>
       <div className="min-h-screen pt-6 pb-28">
-        {" "}
-        {/* padding maior para FooterNav */}
         <header className="mb-8">
           <div className="flex items-center mb-2">
             <Button
@@ -180,18 +176,13 @@ const Profile: React.FC = () => {
             Gerencie suas informações pessoais e financeiras
           </p>
         </header>
+
         <Tabs defaultValue="personal" className="mb-8">
           <TabsList className="grid grid-cols-2 w-full bg-eco-green-50 p-1 rounded-lg">
-            <TabsTrigger
-              value="personal"
-              className="data-[state=active]:bg-white"
-            >
+            <TabsTrigger value="personal" className="data-[state=active]:bg-white">
               Informações Pessoais
             </TabsTrigger>
-            <TabsTrigger
-              value="payment"
-              className="data-[state=active]:bg-white"
-            >
+            <TabsTrigger value="payment" className="data-[state=active]:bg-white">
               Métodos de Pagamento
             </TabsTrigger>
           </TabsList>
@@ -205,17 +196,10 @@ const Profile: React.FC = () => {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => setIsEditing(!isEditing)}
+                  onClick={isEditing ? handleCancelEdit : () => setIsEditing(true)}
                   className="flex items-center text-eco-green-600 hover:text-eco-green-700"
                 >
-                  {isEditing ? (
-                    "Cancelar"
-                  ) : (
-                    <>
-                      <Edit className="w-4 h-4 mr-1" />
-                      Editar
-                    </>
-                  )}
+                  {isEditing ? "Cancelar" : <><Edit className="w-4 h-4 mr-1" />Editar</>}
                 </Button>
               </div>
 
@@ -237,9 +221,7 @@ const Profile: React.FC = () => {
                     )}
                   </div>
                   <div>
-                    <h3 className="font-medium text-gray-900">
-                      {userData.name}
-                    </h3>
+                    <h3 className="font-medium text-gray-900">{userData.name}</h3>
                     <p className="text-sm text-gray-500">
                       Membro desde {formatarMesAno(userData.dataRegistro)}
                     </p>
@@ -247,9 +229,7 @@ const Profile: React.FC = () => {
                 </div>
 
                 <div>
-                  <p className="text-sm font-medium text-gray-500">
-                    Código de Cadastro
-                  </p>
+                  <p className="text-sm font-medium text-gray-500">Código de Cadastro</p>
                   <p className="text-gray-800 font-mono bg-eco-green-50 px-3 py-1 rounded inline-block">
                     {userData.registrationCode}
                   </p>
@@ -258,12 +238,7 @@ const Profile: React.FC = () => {
                 {isEditing ? (
                   <div className="space-y-4">
                     <div>
-                      <label
-                        htmlFor="name"
-                        className="block text-sm font-medium text-gray-700 mb-1"
-                      >
-                        Nome
-                      </label>
+                      <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">Nome</label>
                       <input
                         type="text"
                         id="name"
@@ -274,12 +249,7 @@ const Profile: React.FC = () => {
                     </div>
 
                     <div>
-                      <label
-                        htmlFor="email"
-                        className="block text-sm font-medium text-gray-700 mb-1"
-                      >
-                        Email
-                      </label>
+                      <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email</label>
                       <input
                         type="email"
                         id="email"
@@ -290,12 +260,7 @@ const Profile: React.FC = () => {
                     </div>
 
                     <div>
-                      <label
-                        htmlFor="phone"
-                        className="block text-sm font-medium text-gray-700 mb-1"
-                      >
-                        Telefone
-                      </label>
+                      <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
                       <input
                         type="tel"
                         id="phone"
@@ -313,12 +278,7 @@ const Profile: React.FC = () => {
                     </div>
 
                     <div>
-                      <label
-                        htmlFor="imagem"
-                        className="block text-sm font-medium text-gray-700 mb-1"
-                      >
-                        Foto de Perfil
-                      </label>
+                      <label htmlFor="imagem" className="block text-sm font-medium text-gray-700 mb-1">Foto de Perfil</label>
                       <input
                         type="file"
                         id="imagem"
@@ -353,9 +313,7 @@ const Profile: React.FC = () => {
                       <p className="text-gray-800">{userData.email}</p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-500">
-                        Telefone
-                      </p>
+                      <p className="text-sm font-medium text-gray-500">Telefone</p>
                       <p className="text-gray-800">{userData.phone}</p>
                     </div>
                   </div>
@@ -374,7 +332,8 @@ const Profile: React.FC = () => {
           </TabsContent>
         </Tabs>
       </div>
-      <FooterNav /> {/* Rodapé fixo */}
+
+      <FooterNav />
     </Layout>
   );
 };

@@ -14,9 +14,9 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import FooterNav from "@/components/FooterNav"; // Importado aqui
+import FooterNav from "@/components/FooterNav";
 
-const VALOR_UNITARIO_CREDITO = 0.05;
+const VALOR_UNITARIO_CREDITO = 0.05; // cada crédito vale SCB 0.05
 
 interface RespostaVenda {
   mensagem?: string;
@@ -46,7 +46,17 @@ const SellCredits: React.FC = () => {
   }, [buscarSaldo]);
 
   const quantidade = parseFloat(amount || "0");
-  const valorEstimado = quantidade * VALOR_UNITARIO_CREDITO;
+  const valorEstimado = parseFloat((quantidade * VALOR_UNITARIO_CREDITO).toFixed(2));
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const valor = parseFloat(e.target.value);
+    if (valor < 0) {
+      toast.error("Valor não pode ser negativo.");
+      setAmount("");
+      return;
+    }
+    setAmount(e.target.value);
+  };
 
   const handleConfirmarVenda = async () => {
     setConfirmando(true);
@@ -85,14 +95,17 @@ const SellCredits: React.FC = () => {
       return;
     }
 
+    if (valorEstimado < 0.01) {
+      toast.error("O valor mínimo de venda é SCB 0.01.");
+      return;
+    }
+
     setAbrirModal(true);
   };
 
   return (
     <Layout showNavbar>
       <div className="min-h-screen pt-6 pb-28 page-transition">
-        {" "}
-        {/* espaço extra no padding inferior */}
         <div className="mb-6 flex items-center">
           <Button
             variant="ghost"
@@ -104,6 +117,8 @@ const SellCredits: React.FC = () => {
           </Button>
           <h1 className="text-2xl font-bold">Vender Créditos de Carbono</h1>
         </div>
+
+        {/* Saldo atual */}
         <div className="mb-6 glass-card p-5 rounded-xl">
           <div className="flex items-center mb-4">
             <Leaf className="text-eco-blue-500 mr-2 h-5 w-5" />
@@ -122,6 +137,8 @@ const SellCredits: React.FC = () => {
             {(saldoCreditos * VALOR_UNITARIO_CREDITO).toFixed(2)}
           </div>
         </div>
+
+        {/* Formulário de venda */}
         <div className="mb-6 glass-card p-5 rounded-xl">
           <h2 className="text-lg font-medium mb-4">Quanto deseja vender?</h2>
           <div className="relative mb-2">
@@ -129,9 +146,10 @@ const SellCredits: React.FC = () => {
               type="number"
               placeholder="0.00"
               value={amount}
-              onChange={(e) => setAmount(e.target.value)}
+              onChange={handleInputChange}
               max={saldoCreditos}
-              step={0.1}
+              step={0.01}
+              min={0}
             />
             <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
               <span className="text-gray-500">Ton CO₂</span>
@@ -140,7 +158,7 @@ const SellCredits: React.FC = () => {
           <div className="text-sm text-gray-600">
             <span>Valor estimado: </span>
             <span className="font-medium text-eco-blue-600">
-              SCB {valorEstimado.toFixed(2)}
+              SCB {valorEstimado}
             </span>
           </div>
 
@@ -151,6 +169,8 @@ const SellCredits: React.FC = () => {
             </div>
           )}
         </div>
+
+        {/* Informações sobre recebimento */}
         <div className="glass-card p-5 rounded-xl mb-6">
           <h2 className="text-lg font-medium mb-4">Onde vou receber?</h2>
           <div className="text-sm text-gray-700 leading-relaxed bg-yellow-50 border border-yellow-300 p-4 rounded-lg">
@@ -170,13 +190,16 @@ const SellCredits: React.FC = () => {
             </p>
           </div>
         </div>
+
+        {/* Botão principal */}
         <Button
           onClick={handleAbrirModal}
           className="w-full bg-eco-blue-600 hover:bg-eco-blue-700 py-6"
-          disabled={!amount || quantidade <= 0 || quantidade > saldoCreditos}
+          disabled={!amount || quantidade <= 0 || quantidade > saldoCreditos || valorEstimado <= 0}
         >
           Vender Créditos
         </Button>
+
         {/* Modal de confirmação */}
         <Dialog open={abrirModal} onOpenChange={setAbrirModal}>
           <DialogContent>
@@ -204,7 +227,7 @@ const SellCredits: React.FC = () => {
           </DialogContent>
         </Dialog>
       </div>
-      <FooterNav /> {/* Rodapé fixo */}
+      <FooterNav />
     </Layout>
   );
 };

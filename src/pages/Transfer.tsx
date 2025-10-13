@@ -20,7 +20,7 @@ import {
 } from "@/services/transfer";
 
 import { getSaldo, getSaldoCreditos } from "@/services/getBalance";
-import FooterNav from "@/components/FooterNav"; // <== Rodapé adicionado aqui
+import FooterNav from "@/components/FooterNav";
 
 interface Destinatario {
   nome: string;
@@ -163,7 +163,7 @@ const Transfer: React.FC = () => {
 
   return (
     <Layout showNavbar>
-      <div className="min-h-screen pt-6 pb-28 page-transition">
+      <div className="min-h-screen pt-6 pb-28 px-4 sm:px-6 page-transition">
         <div className="mb-6 flex items-center">
           <Button
             variant="ghost"
@@ -173,10 +173,12 @@ const Transfer: React.FC = () => {
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="text-2xl font-bold">Transferir Créditos de Carbono</h1>
+          <h1 className="text-2xl font-bold">
+            Transferir Créditos de Carbono
+          </h1>
         </div>
 
-        <div className="mb-2 text-sm text-gray-600">
+        <div className="mb-2 text-sm text-gray-600 text-center sm:text-left">
           Saldo disponível:{" "}
           <strong>
             {saldoCreditos.toLocaleString("pt-BR", {
@@ -187,29 +189,59 @@ const Transfer: React.FC = () => {
           </strong>
         </div>
 
-        <div className="mb-6 glass-card p-5 rounded-xl">
+        {/* Campo de destinatário com botão de alterar */}
+        <div className="mb-6 glass-card p-5 rounded-xl shadow-md">
           <div className="flex items-center mb-4">
             <User className="text-gray-500 mr-2 h-5 w-5" />
             <h2 className="text-lg font-medium">
               Para quem você quer transferir?
             </h2>
           </div>
-          <Input
-            placeholder="Email ou CNPJ"
-            value={recipientInput}
-            onChange={(e) => setRecipientInput(e.target.value)}
-            onBlur={handleCheckRecipient}
-            disabled={loading || canEditAmount}
-          />
+
+          <div className="flex flex-col gap-3">
+            <Input
+              placeholder="Email ou CNPJ"
+              value={recipientInput}
+              onChange={(e) => setRecipientInput(e.target.value)}
+              onBlur={!canEditAmount ? handleCheckRecipient : undefined}
+              disabled={loading || canEditAmount}
+              className="h-11"
+            />
+
+            {canEditAmount && recipientData && (
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center text-sm text-gray-600 gap-2">
+                <span className="text-center sm:text-left">
+                  Destinatário confirmado:{" "}
+                  <strong>{recipientData.nome}</strong>
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full sm:w-auto"
+                  onClick={() => {
+                    setRecipientData(null);
+                    setCanEditAmount(false);
+                    setAmount("");
+                    setDescricao("");
+                    toast.info("Você pode selecionar outro destinatário.");
+                  }}
+                >
+                  Alterar
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
 
-        <div className="mb-6 glass-card p-5 rounded-xl">
+        {/* Campo de valor */}
+        <div className="mb-6 glass-card p-5 rounded-xl shadow-md">
           <div className="flex items-center mb-4">
             <Send className="text-gray-500 mr-2 h-5 w-5" />
             <h2 className="text-lg font-medium">
               Quanto você quer transferir?
             </h2>
           </div>
+
           <div className="relative">
             <Input
               type="number"
@@ -220,13 +252,15 @@ const Transfer: React.FC = () => {
               disabled={!canEditAmount || loading}
               min={0}
               max={saldoCreditos}
+              className="h-11"
             />
             <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-              <span className="text-gray-500">Ton CO₂</span>
+              <span className="text-gray-500 text-sm">Ton CO₂</span>
             </div>
           </div>
+
           {parseFloat(amount || "0") > saldoCreditos && (
-            <div className="mt-2 text-sm text-red-500">
+            <div className="mt-2 text-sm text-red-500 text-center sm:text-left">
               Créditos insuficientes para esta transferência.
             </div>
           )}
@@ -237,13 +271,14 @@ const Transfer: React.FC = () => {
               value={descricao}
               onChange={(e) => setDescricao(e.target.value)}
               disabled={!canEditAmount || loading}
+              className="h-11"
             />
           </div>
         </div>
 
         <Button
           onClick={handleTransferClick}
-          className="w-full bg-eco-green-600 hover:bg-eco-green-700 py-6"
+          className="w-full bg-eco-green-600 hover:bg-eco-green-700 py-6 text-base rounded-xl"
           disabled={
             loading ||
             !amount ||
@@ -320,7 +355,7 @@ const Transfer: React.FC = () => {
           </DialogContent>
         </Dialog>
       </div>
-      <FooterNav /> {/* <- Rodapé fixo aqui */}
+      <FooterNav />
     </Layout>
   );
 };
