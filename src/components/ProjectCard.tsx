@@ -2,13 +2,17 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 
 interface ProjectCardProps {
+  id: number;
   title: string;
   description: string;
   price: string;
   image: string;
+  onClick?: () => void; // adiciona
+  showMoreButton?: boolean; // adiciona
 }
 
 const ProjectCard: React.FC<ProjectCardProps> = ({
+  id, 
   title,
   description,
   price,
@@ -34,7 +38,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
             {price}/t
           </span>
           <button
-            onClick={() => navigate("/buy-credits")}
+            onClick={() => navigate(`/projetos/${id}`)}
             className="text-xs px-3 py-1 rounded-full bg-eco-green-100 text-eco-green-700 font-medium"
           >
             Ver Mais
@@ -44,5 +48,6 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
     </div>
   );
 };
+
 
 export default ProjectCard;

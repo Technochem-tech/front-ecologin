@@ -5,6 +5,7 @@ import CarbonCreditsCard from "@/components/CarbonCreditsCard";
 import ActionButton from "@/components/ActionButton";
 import ProjectCard from "@/components/ProjectCard";
 import FooterNav from "@/components/FooterNav";
+import { ArrowLeft, Loader2 } from "lucide-react"; // 👈 ícones
 
 import { useNavigate } from "react-router-dom";
 import React, { useEffect, useState } from "react";
@@ -29,6 +30,7 @@ const Dashboard: React.FC = () => {
     null
   );
   const [projects, setProjects] = useState<Projeto[]>([]);
+  const [loading, setLoading] = useState(true); // 👈 estado de loading
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -92,6 +94,8 @@ const Dashboard: React.FC = () => {
         setProjects(dados);
       } catch (error) {
         console.error("Erro ao buscar projetos:", error);
+      } finally {
+        setLoading(false); // 👈 encerra o loading mesmo em caso de erro
       }
     };
 
@@ -229,23 +233,35 @@ const Dashboard: React.FC = () => {
               Projetos Sustentáveis
             </h2>
             <button
-              onClick={() => navigate("/buy-credits")}
+              onClick={() => navigate("/projetos")}
               className="text-sm text-eco-green-600 flex items-center"
             >
               Ver todos <ChevronRight className="h-4 w-4" />
             </button>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {projects.map((project) => (
-              <ProjectCard
-                key={project.id}
-                title={project.titulo}
-                description={project.descricao}
-                price={`SCB ${project.valor.toFixed(2)}`}
-                image={`data:image/jpeg;base64,${project.imgBase64}`}
-              />
-            ))}
-          </div>
+
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-10 text-gray-600">
+              <Loader2 className="h-8 w-8 animate-spin mb-2 text-eco-green-600" />
+              <span>Carregando projetos...</span>
+            </div>
+          ) : projects.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              {projects.map((project) => (
+                <ProjectCard
+                  key={project.id}
+                  title={project.titulo}
+                  description={project.descricao}
+                  price={`SCB ${project.valor.toFixed(2)}`}
+                  image={`data:image/jpeg;base64,${project.imgBase64}`}
+                />
+              ))}
+            </div>
+          ) : (
+            <p className="text-center text-gray-500 py-8">
+              Nenhum projeto encontrado.
+            </p>
+          )}
         </section>
       </div>
 

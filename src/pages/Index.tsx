@@ -5,17 +5,16 @@ import Layout from "@/components/Layout";
 import logo from "@/assets/logo-soscarbono.png";
 import { login } from "@/services/login";
 import { AxiosError } from "axios";
+import { toast } from "sonner";
 
 const Index: React.FC = () => {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
-  const [erroMensagem, setErroMensagem] = useState<string | null>(null);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setErroMensagem(null);
     try {
       const resposta = await login({ email, senha });
       localStorage.setItem("token", resposta.token);
@@ -23,9 +22,9 @@ const Index: React.FC = () => {
     } catch (erro: unknown) {
       const err = erro as AxiosError<{ mensagem: string }>;
       if (err.response?.data?.mensagem) {
-        setErroMensagem(err.response.data.mensagem);
+        toast.error(err.response.data.mensagem);
       } else {
-        setErroMensagem("Erro inesperado ao fazer login.");
+        toast.error("Erro inesperado ao fazer login.");
       }
     }
   };
@@ -39,12 +38,7 @@ const Index: React.FC = () => {
 
         <div className="w-full max-w-md space-y-8">
           <div className="text-center">
-            <div className="relative mb-2 inline-block">  
-            </div>
             <img src={logo} alt="Logo SOS Carbono" className="mx-auto mt-7 w-60 h-auto" />
-            {/* <h1 className="mt-6 text-3xl font-bold tracking-tight text-gray-900">
-              EcoFinance
-            </h1> */}
             <p className="mt-2 text-sm text-gray-600">
               Transforme suas finanças. Salve o planeta.
             </p>
@@ -136,12 +130,6 @@ const Index: React.FC = () => {
                 </button>
               </div>
             </form>
-
-            {erroMensagem && (
-              <div className="mt-2 text-xs text-center text-gray-600">
-                {erroMensagem}
-              </div>
-            )}
 
             <div className="mt-6 flex items-center justify-between">
               <div className="text-sm">

@@ -10,6 +10,14 @@ interface Projeto {
   creditosDisponivel: number;
 }
 
+export interface Projetoid {
+  id: number;
+  titulo: string;
+  valor: number;
+  descricao: string;
+  imgBase64: string;
+  creditosDisponivel: number;
+}
 export async function ListarProjetos(token: string): Promise<Projeto[]> {
   try {
     const response = await api.get("/api/Projetos/ListarProjetos", {
@@ -19,6 +27,24 @@ export async function ListarProjetos(token: string): Promise<Projeto[]> {
     });
     // Retorna apenas o array de projetos
     return response.data.projetossustentaveis;
+  } catch (error) {
+    tratarErroAPI(error);
+    throw error;
+  }
+}
+
+
+export async function BuscarProjetoPorId(
+  id: number,
+  token: string
+): Promise<Projetoid> {
+  try {
+    const response = await api.get(`/api/Projetos/BuscarPorId/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data; 
   } catch (error) {
     tratarErroAPI(error);
     throw error;

@@ -3,7 +3,7 @@ import Layout from "@/components/Layout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, ShoppingCart, Leaf, Info } from "lucide-react";
+import { ArrowLeft, ShoppingCart, Leaf, Info, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { ListarProjetos } from "@/services/projects";
@@ -35,6 +35,7 @@ const BuyCredits: React.FC = () => {
   const [projects, setProjects] = useState<Projeto[]>([]);
   const [loading, setLoading] = useState(false);
   const [compra, setCompra] = useState<CompraResponse | null>(null);
+  const [loadingProjects, setLoadingProjects] = useState(true); // 👈 novo estado
 
   const TONELADAS_MINIMAS = 0.01;
 
@@ -48,7 +49,8 @@ const BuyCredits: React.FC = () => {
 
     ListarProjetos(token)
       .then((lista) => setProjects(lista))
-      .catch(() => toast.error("Erro ao carregar projetos."));
+      .catch(() => toast.error("Erro ao carregar projetos."))
+      .finally(() => setLoadingProjects(false)); // 👈 encerra o loading
   }, [navigate]);
 
   useEffect(() => {
@@ -218,39 +220,51 @@ const BuyCredits: React.FC = () => {
           {/* PROJETOS */}
           <div className="mb-6">
             <h2 className="text-lg font-medium mb-4">Selecione um projeto</h2>
-            <div className="space-y-4">
-              {projects.map((project, index) => (
-                <Card
-                  key={project.id}
-                  className={`cursor-pointer transition-all ${
-                    selectedProject === index ? "ring-2 ring-eco-green-500" : ""
-                  }`}
-                  onClick={() => setSelectedProject(index)}
-                >
-                  <div className="flex">
-                    <div className="w-24 h-24 overflow-hidden rounded-l-xl">
-                      <img
-                        src={`data:image/jpeg;base64,${project.imgBase64}`}
-                        alt={project.titulo}
-                        className="h-full w-full object-cover"
-                      />
+
+            {loadingProjects ? (
+              // 🔄 Tela de carregamento
+              <div className="flex items-center justify-center py-10 space-x-2 text-eco-green-600">
+                <Loader2 className="animate-spin w-6 h-6" />
+                <span>Carregando projetos...</span>
+              </div>
+            ) : (
+              // ✅ Lista de projetos
+              <div className="space-y-4">
+                {projects.map((project, index) => (
+                  <Card
+                    key={project.id}
+                    className={`cursor-pointer transition-all ${
+                      selectedProject === index
+                        ? "ring-2 ring-eco-green-500"
+                        : ""
+                    }`}
+                    onClick={() => setSelectedProject(index)}
+                  >
+                    <div className="flex">
+                      <div className="w-24 h-24 overflow-hidden rounded-l-xl">
+                        <img
+                          src={`data:image/jpeg;base64,${project.imgBase64}`}
+                          alt={project.titulo}
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+                      <div className="flex-1 p-4">
+                        <h3 className="font-medium">{project.titulo}</h3>
+                        <p className="text-sm text-gray-500 line-clamp-1">
+                          {project.descricao}
+                        </p>
+                        <p className="text-eco-green-600 font-medium mt-2">
+                          SCB {project.valor.toFixed(2)}/tonelada
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {project.creditosDisponivel}T disponíveis
+                        </p>
+                      </div>
                     </div>
-                    <div className="flex-1 p-4">
-                      <h3 className="font-medium">{project.titulo}</h3>
-                      <p className="text-sm text-gray-500 line-clamp-1">
-                        {project.descricao}
-                      </p>
-                      <p className="text-eco-green-600 font-medium mt-2">
-                        SCB {project.valor.toFixed(2)}/tonelada
-                      </p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        {project.creditosDisponivel}T disponíveis
-                      </p>
-                    </div>
-                  </div>
-                </Card>
-              ))}
-            </div>
+                  </Card>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* PAGAMENTO */}

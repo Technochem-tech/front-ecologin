@@ -17,6 +17,7 @@ import Transfer from "./pages/Transfer";
 import Transactions from "./pages/Transactions";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
+import ProjetosPage from "@/pages/ProjetosPage";
 
 const queryClient = new QueryClient();
 
@@ -32,7 +33,7 @@ const App = () => (
           <Route path="/registration" element={<Registration />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
-
+          <Route path="/projetos" element={<ProjetosPage />} />
           <Route path="*" element={<NotFound />} />
 
           {/* Rotas protegidas */}
