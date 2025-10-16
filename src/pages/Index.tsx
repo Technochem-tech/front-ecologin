@@ -33,7 +33,7 @@ const Index: React.FC = () => {
     <Layout>
       <div className="min-h-screen flex flex-col justify-center items-center page-transition py-12 px-4 sm:px-6 lg:px-8">
         <div className="absolute inset-0 -z-10 overflow-hidden">
-          <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?q=80&w=2913&auto=format&fit=crop')] bg-cover bg-center opacity-10"></div>
+         
         </div>
 
         <div className="w-full max-w-md space-y-8">
