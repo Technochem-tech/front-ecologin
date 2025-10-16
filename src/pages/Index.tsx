@@ -40,7 +40,7 @@ const Index: React.FC = () => {
           <div className="text-center">
             <img src={logo} alt="Logo SOS Carbono" className="mx-auto mt-7 w-60 h-auto" />
             <p className="mt-2 text-sm text-gray-600">
-              Transforme suas finanças. Salve o planeta.
+              Conectando você a um futuro mais verde. Salve o planeta.
             </p>
           </div>
 
